@@ -9,7 +9,6 @@ class Isotope:
 
         Args:
             name (str): _Full name (e.g. Caesium-137)._
-            symbol (str): _Shorthand symbol (e.g. 137Cs or Cs-137)_
             E (float): _Energy of the primary gamma in keV._
             b (float): _Branching ratio for the gamma at energy E._
         """        
