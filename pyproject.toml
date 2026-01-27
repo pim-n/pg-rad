@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project]
+name = "pg-rad"
+version = "0.1.0"
+authors = [
+  { name="Pim Nelissen", email="pi0274ne-s@student.lu.se" },
+]
+description = "Primary Gamma RADiation Landscape"
+readme = "README.md"
+requires-python = ">=3.12.4"
+dependencies = [
+    "matplotlib>=3.9.2",
+    "numpy>=2",
+    "pandas>=2.3.1",
+    "piecewise_regression==1.5.0",
+    "pyyaml>=6.0.2"
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/pim-n/pg-rad"
+Issues = "https://github.com/pim-n/pg-rad/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "notebook"]
