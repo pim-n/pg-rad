@@ -1,6 +1,8 @@
 import math
 from typing import Self
 
+from pg_rad.isotopes import Isotope
+
 class Object:
     def __init__(
             self,
@@ -23,19 +25,41 @@ class Object:
         )
     
 class Source(Object):
+    _id_counter = 1
     def __init__(
             self,
             x: float,
             y: float,
             z: float,
-            strength: int,
-            name: str = "Unnamed source",
+            activity: int,
+            isotope: Isotope,
+            name: str | None = None,
             color: str = "red"):
-    
+        """_A point source._
+
+        Args:
+            x (float): _X coordinate._
+            y (float):  _Y coordinate._
+            z (float):  _Z coordinate._
+            activity (int): _Activity A in MBq._
+            isotope (Isotope): _The isotope._
+            name (str | None, optional): _Can give the source a unique name_.
+            Defaults to None, making the name sequential
+            (Source-1, Source-2, etc.).
+            color (str, optional): _Matplotlib compatible color string_. Defaults to "red".
+        """        
+        self.id = Source._id_counter
+        Source._id_counter += 1
+
+        # default name derived from ID if not provided
+        if name is None:
+            name = f"Source {self.id}"
+
         super().__init__(x, y, z, name, color)
 
-        self.strength = strength
+        self.activity = activity
+        self.isotope = isotope
         self.color = color
 
     def __repr__(self):
-        return f"Source(name={self.name}, strength={self.strength}, pos={(self.x, self.y, self.z)})"
+        return f"Source(name={self.name}, A={self.activity} MBq, pos={(self.x, self.y, self.z)})"
