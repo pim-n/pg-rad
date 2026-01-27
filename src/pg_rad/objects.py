@@ -1,7 +1,7 @@
 import math
 from typing import Self
 
-from pg_rad.isotopes import Isotope
+from pg_rad.isotope import Isotope
 
 class Object:
     def __init__(
