@@ -15,12 +15,9 @@ class Landscape:
         """_A generic Landscape that can contain a Path and sources._
 
         Args:
-            air_density (float, optional): _Air density in kg / m^3_. Defaults to 1.243.
-            size (int | tuple[int, int, int], optional): _Size of the world_. Defaults to 500.
-            scale (str, optional): _The scale of the size argument passed_. Defaults to 'meters'.
-
-        Raises:
-            TypeError: _description_
+            air_density (float, optional): Air density in kg / m^3. Defaults to 1.243.
+            size (int | tuple[int, int, int], optional): Size of the world. Defaults to 500.
+            scale (str, optional): The scale of the size argument passed. Defaults to 'meters'.
         """        
         
         if isinstance(size, int):
@@ -103,11 +100,11 @@ def create_landscape_from_path(path: Path, max_z = 500):
     the size of the Landscape._
 
     Args:
-        path (Path): _A Path object describing the trajectory._
-        max_z (int, optional): _Height of the world_. Defaults to 500 meters.
+        path (Path): A Path object describing the trajectory.
+        max_z (int, optional): Height of the world. Defaults to 500 meters.
 
     Returns:
-        _type_: _A Landscape with dimensions based on the provided Path._
+        Landscape: A Landscape with dimensions based on the provided Path.
     """    
     max_x = np.ceil(max(path.x_list))
     max_y = np.ceil(max(path.y_list))

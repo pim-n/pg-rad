@@ -45,14 +45,11 @@ class Path:
             z: float = 0,
             simplify_path = False
                  ):
-        """Construct a path of sequences based on a list of coordinates.
+        """_Construct a path of sequences based on a list of coordinates._
 
         Args:
-            coord_list (Sequence[tuple[float, float]]): _description_
-            z (float, optional): _description_. Defaults to 0.
-
-        Raises:
-            ValueError: _description_
+            coord_list (Sequence[tuple[float, float]]): List of x,y coordinates.
+            z (float, optional): Height of the path. Defaults to 0.
         """        
         
         if len(coord_list) < 2:
@@ -114,12 +111,12 @@ def piecewise_regression_on_path(
     order to find better global optima."
 
     Args:
-        x (Sequence[float]): _Full list of x coordinates._
-        y (Sequence[float]): _Full list of y coordinates._
-        keep_endpoints_equal (bool, optional): _Whether or not to force start
+        x (Sequence[float]): Full list of x coordinates.
+        y (Sequence[float]): Full list of y coordinates.
+        keep_endpoints_equal (bool, optional): Whether or not to force start
         and end to be exactly equal to the original. This will worsen the linear
-        approximation at the beginning and end of path. Defaults to False._
-        n_breakpoints (int, optional): _Number of breakpoints. Defaults to 3._
+        approximation at the beginning and end of path. Defaults to False.
+        n_breakpoints (int, optional): Number of breakpoints. Defaults to 3.
 
     Returns:
         x (Sequence[float]): _Reduced list of x coordinates._
@@ -170,12 +167,12 @@ def path_from_RT90(
     """_Construct a path from East and North formatted coordinates (RT90) in a Pandas DataFrame._
 
     Args:
-        df (pd.DataFrame): _DataFrame containing at least the two columns noted in the cols argument._
-        east_col (str): _The column name for the East coordinates._
-        north_col (str): _The column name for the North coordinates._
+        df (pd.DataFrame): DataFrame containing at least the two columns noted in the cols argument.
+        east_col (str): The column name for the East coordinates.
+        north_col (str): The column name for the North coordinates.
 
     Returns:
-        Path: _A Path object built from the aquisition coordinates in the DataFrame._
+        Path: A Path object built from the aquisition coordinates in the DataFrame.
     """    
     
     east_arr = np.array(df[east_col]) - min(df[east_col])

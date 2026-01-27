@@ -38,15 +38,15 @@ class Source(Object):
         """_A point source._
 
         Args:
-            x (float): _X coordinate._
-            y (float):  _Y coordinate._
-            z (float):  _Z coordinate._
-            activity (int): _Activity A in MBq._
-            isotope (Isotope): _The isotope._
-            name (str | None, optional): _Can give the source a unique name_.
-            Defaults to None, making the name sequential
+            x (float): X coordinate.
+            y (float): Y coordinate.
+            z (float): Z coordinate.
+            activity (int): Activity A in MBq.
+            isotope (Isotope): The isotope.
+            name (str | None, optional): Can give the source a unique name.
+            Defaults to None, making the name sequential.
             (Source-1, Source-2, etc.).
-            color (str, optional): _Matplotlib compatible color string_. Defaults to "red".
+            color (str, optional): Matplotlib compatible color string. Defaults to "red".
         """        
         self.id = Source._id_counter
         Source._id_counter += 1

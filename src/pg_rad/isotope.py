@@ -8,9 +8,9 @@ class Isotope:
         """_Represents the essential information of an isotope._
 
         Args:
-            name (str): _Full name (e.g. Caesium-137)._
-            E (float): _Energy of the primary gamma in keV._
-            b (float): _Branching ratio for the gamma at energy E._
+            name (str): Full name (e.g. Caesium-137).
+            E (float): Energy of the primary gamma in keV.
+            b (float): Branching ratio for the gamma at energy E.
         """        
         
         if E <= 0:
