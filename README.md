@@ -18,7 +18,7 @@ git checkout dev
 
 ## Dependencies / venv
 
-With Python verion `>=3.12.4`, create a virtual environment and install pg-rad.
+With Python verion `>=3.12.4` and `<3.13`, create a virtual environment and install pg-rad.
 
 ```
 python3 -m venv .venv
