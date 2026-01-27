@@ -8,9 +8,20 @@ from pg_rad.objects import Source
 class Landscape:
     def __init__(
             self,
+            air_density: float = 1.243,
             size: int | tuple[int, int, int] = 500,
             scale = 'meters',
             ):
+        """_A generic Landscape that can contain a Path and sources._
+
+        Args:
+            air_density (float, optional): _Air density in kg / m^3_. Defaults to 1.243.
+            size (int | tuple[int, int, int], optional): _Size of the world_. Defaults to 500.
+            scale (str, optional): _The scale of the size argument passed_. Defaults to 'meters'.
+
+        Raises:
+            TypeError: _description_
+        """        
         
         if isinstance(size, int):
             self.world = np.zeros((size, size, size))
@@ -19,6 +30,7 @@ class Landscape:
         else:
             raise TypeError("size must be an integer or a tuple of 3 integers.")
 
+        self.air_density = air_density
         self.scale = scale
 
         self.path: Path = None
