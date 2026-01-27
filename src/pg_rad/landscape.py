@@ -6,7 +6,12 @@ from pg_rad.path import Path
 from pg_rad.objects import Source
 
 class Landscape:
-    def __init__(self, size: int | tuple[int, int, int] = 500, unit = 'meters'):
+    def __init__(
+            self,
+            size: int | tuple[int, int, int] = 500,
+            scale = 'meters',
+            ):
+        
         if isinstance(size, int):
             self.world = np.zeros((size, size, size))
         elif isinstance(size, tuple) and len(size) == 3:
@@ -14,7 +19,7 @@ class Landscape:
         else:
             raise TypeError("size must be an integer or a tuple of 3 integers.")
 
-        self.unit = unit
+        self.scale = scale
 
         self.path: Path = None
         self.sources: list[Source] = []
@@ -33,8 +38,8 @@ class Landscape:
         fig, ax = plt.subplots()
         ax.set_xlim(right=x_lim)
         ax.set_ylim(top=y_lim)
-        ax.set_xlabel(f"X [{self.unit}]")
-        ax.set_ylabel(f"Y [{self.unit}]")
+        ax.set_xlabel(f"X [{self.scale}]")
+        ax.set_ylabel(f"Y [{self.scale}]")
 
         if not self.path == None:
             ax.plot(self.path.x_list, self.path.y_list, 'bo-')
