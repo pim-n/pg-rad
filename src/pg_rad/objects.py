@@ -62,4 +62,4 @@ class Source(Object):
         self.color = color
 
     def __repr__(self):
-        return f"Source(name={self.name}, A={self.activity} MBq, pos={(self.x, self.y, self.z)})"
+        return f"Source(name={self.name}, pos={(self.x, self.y, self.z)}, isotope={self.isotope.name}, A={self.activity} MBq)"
