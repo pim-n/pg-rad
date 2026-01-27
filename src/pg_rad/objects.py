@@ -36,3 +36,6 @@ class Source(Object):
 
         self.strength = strength
         self.color = color
+
+    def __repr__(self):
+        return f"Source(name={self.name}, strength={self.strength}, pos={(self.x, self.y, self.z)})"
