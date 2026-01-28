@@ -23,13 +23,26 @@ With Python verion `>=3.12.4` and `<3.13`, create a virtual environment and inst
 ```
 python3 -m venv .venv
 source .venv/bin/activate
-(venv) pip install -e .[dev]
+
+With the virtual environment activated, run:
+
+```
+pip install -e .[dev]
 ```
 
 ## Tests
 
-Tests can be run with `pytest` from the root directory of the repository.
+Tests can be run with `pytest` from the root directory of the repository. With the virtual environment activated, run:
 
 ```
-(venv) pytest
+pytest
 ```
+
+## Local viewing of documentation
+
+PG-RAD uses [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) for generating documentation. It can be locally viewed by (in the venv) running:
+```
+mkdocs serve
+```
+
+where you can add the `--livereload` flag to automatically update the documentation as you write to the Markdown files.
