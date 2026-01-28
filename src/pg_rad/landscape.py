@@ -3,7 +3,7 @@ from matplotlib.patches import Circle
 import numpy as np
 
 from pg_rad.path import Path
-from pg_rad.objects import Source
+from pg_rad.sources import PointSource
 
 class Landscape:
     """A generic Landscape that can contain a Path and sources.
@@ -30,7 +30,7 @@ class Landscape:
         self.scale = scale
 
         self.path: Path = None
-        self.sources: list[Source] = []
+        self.sources: list[PointSource] = []
     
     def plot(self, z = 0):
         """Plot a slice of the world at a height `z`.
@@ -76,11 +76,11 @@ class Landscape:
                 
         return fig, ax
 
-    def add_sources(self, *sources: Source):
+    def add_sources(self, *sources: PointSource):
         """Add one or more point sources to the world.
 
         Args:
-            *sources (pg_rad.objects.Source): One or more sources, passed as
+            *sources (pg_rad.sources.PointSource): One or more sources, passed as
             Source1, Source2, ...
         Raises:
             ValueError: If the source is outside the boundaries of the landscape.
