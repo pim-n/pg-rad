@@ -23,6 +23,7 @@ With Python verion `>=3.12.4` and `<3.13`, create a virtual environment and inst
 ```
 python3 -m venv .venv
 source .venv/bin/activate
+```
 
 With the virtual environment activated, run:
 
