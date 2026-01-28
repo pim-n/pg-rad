@@ -1,28 +1,27 @@
 import numpy as np
 import pytest
 
-from pg_rad.objects import Source
+from pg_rad.sources import PointSource
 
 @pytest.fixture
 def test_sources():
     pos_a = np.random.rand(3)
     pos_b = np.random.rand(3)
 
-    a = Source(*tuple(pos_a), strength = None)
-    b = Source(*tuple(pos_b), strength = None)
+    a = PointSource(*tuple(pos_a), strength = None)
+    b = PointSource(*tuple(pos_b), strength = None)
 
     return pos_a, pos_b, a, b
 
 def test_if_distances_equal(test_sources):
-    """_Verify whether from object A to object B is the same as B to A._"""
+    """Verify whether from PointSource A to PointSource B is the same as B to A."""
 
     _, _, a, b = test_sources
 
     assert a.distance_to(b) == b.distance_to(a)
 
 def test_distance_calculation(test_sources):
-    """_Verify whether distance between two static objects (e.g. sources) 
-    is calculated correctly._"""
+    """Verify whether distance between two PointSources is calculated correctly."""
 
     pos_a, pos_b, a, b = test_sources
 
