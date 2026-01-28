@@ -43,13 +43,14 @@ class Path:
             self,
             coord_list: Sequence[tuple[float, float]],
             z: float = 0,
-            simplify_path = False
+            path_simplify = False
                  ):
         """Construct a path of sequences based on a list of coordinates.
 
         Args:
             coord_list (Sequence[tuple[float, float]]): List of x,y coordinates.
             z (float, optional): Height of the path. Defaults to 0.
+            path_simplify (bool, optional): Whether to pg_rad.path.simplify_path(). Defaults to False.
         """        
         
         if len(coord_list) < 2:
@@ -57,9 +58,9 @@ class Path:
 
         x, y = tuple(zip(*coord_list))
     
-        if simplify_path:
+        if path_simplify:
             try:
-                x, y = piecewise_regression_on_path(list(x), list(y))
+                x, y = simplify_path(list(x), list(y))
             except ConvergenceError:
                 logger.warning("Continuing without simplifying path.")
 
@@ -89,7 +90,7 @@ class Path:
         """  
         plt.plot(self.x_list, self.y_list, **kwargs)
 
-def piecewise_regression_on_path(
+def simplify_path(
         x: Sequence[float],
         y: Sequence[float],
         keep_endpoints_equal: bool = False,
