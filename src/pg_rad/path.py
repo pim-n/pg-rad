@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+import logging
 import math
 
 from matplotlib import pyplot as plt
@@ -7,9 +8,8 @@ import pandas as pd
 import piecewise_regression
 
 from pg_rad.exceptions import ConvergenceError
-from pg_rad.logger import setup_logger
 
-logger = setup_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class PathSegment:
     def __init__(self, a: tuple[float, float], b: tuple[float, float]):
@@ -72,6 +72,8 @@ class Path:
         self.segments = [PathSegment(i, ip1) for i, ip1 in zip(coord_list, coord_list[1:])]
 
         self.z = z
+
+        logger.debug("Path created.")
 
     def get_length(self) -> float:
         return sum([s.length for s in self.segments])
@@ -136,7 +138,7 @@ def simplify_path(
     pw_res = pw_fit.get_results()
 
     if pw_res == None:
-        logger.error("Piecewise regression failed to converge.")
+        logger.warning("Piecewise regression failed to converge.")
         raise ConvergenceError("Piecewise regression failed to converge.") 
     
     est = pw_res['estimates']
@@ -184,4 +186,5 @@ def path_from_RT90(
     coord_pairs = list(zip(east_arr, north_arr))
 
     path = Path(coord_pairs, **kwargs)
+    logger.debug("Loaded path from provided RT90 coordinates.")
     return path

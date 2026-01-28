@@ -1,5 +1,9 @@
+import logging
+
 from pg_rad.objects import Object
 from pg_rad.isotope import Isotope
+
+logger = logging.getLogger(__name__)
 
 class PointSource(Object):
     _id_counter = 1
@@ -38,6 +42,8 @@ class PointSource(Object):
         self.activity = activity
         self.isotope = isotope
         self.color = color
+        
+        logger.debug(f"Source created: {self.name}")
 
     def __repr__(self):
         return f"PointSource(name={self.name}, pos={(self.x, self.y, self.z)}, isotope={self.isotope.name}, A={self.activity} MBq)"

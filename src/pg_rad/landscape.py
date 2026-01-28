@@ -1,9 +1,13 @@
+import logging
+
 from matplotlib import pyplot as plt
 from matplotlib.patches import Circle
 import numpy as np
 
 from pg_rad.path import Path
 from pg_rad.sources import PointSource
+
+logger = logging.getLogger(__name__)
 
 class Landscape:
     """A generic Landscape that can contain a Path and sources.
@@ -31,6 +35,7 @@ class Landscape:
 
         self.path: Path = None
         self.sources: list[PointSource] = []
+        logger.debug("Landscape initialized.")
     
     def plot(self, z = 0):
         """Plot a slice of the world at a height `z`.

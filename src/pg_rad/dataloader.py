@@ -1,12 +1,13 @@
+import logging
+
 import pandas as pd
 
-from pg_rad.logger import setup_logger
 from pg_rad.exceptions import DataLoadError, InvalidCSVError
 
-logger = setup_logger(__name__)
+logger = logging.getLogger(__name__)
 
 def load_data(filename: str) -> pd.DataFrame:
-    logger.debug(f"Attempting to load data from {filename}")
+    logger.debug(f"Attempting to load file: {filename}")
 
     try:
         df = pd.read_csv(filename, delimiter=',')
@@ -23,4 +24,5 @@ def load_data(filename: str) -> pd.DataFrame:
         logger.exception(f"Unexpected error while loading {filename}")
         raise DataLoadError("Unexpected error while loading data") from e
 
+    logger.debug(f"File loaded: {filename}")
     return df
