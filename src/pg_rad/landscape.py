@@ -6,20 +6,19 @@ from pg_rad.path import Path
 from pg_rad.objects import Source
 
 class Landscape:
+    """A generic Landscape that can contain a Path and sources.
+
+    Args:
+        air_density (float, optional): Air density in kg / m^3. Defaults to 1.243.
+        size (int | tuple[int, int, int], optional): Size of the world. Defaults to 500.
+        scale (str, optional): The scale of the size argument passed. Defaults to 'meters'.
+    """    
     def __init__(
             self,
             air_density: float = 1.243,
             size: int | tuple[int, int, int] = 500,
             scale = 'meters',
-            ):
-        """_A generic Landscape that can contain a Path and sources._
-
-        Args:
-            air_density (float, optional): Air density in kg / m^3. Defaults to 1.243.
-            size (int | tuple[int, int, int], optional): Size of the world. Defaults to 500.
-            scale (str, optional): The scale of the size argument passed. Defaults to 'meters'.
-        """        
-        
+            ):    
         if isinstance(size, int):
             self.world = np.zeros((size, size, size))
         elif isinstance(size, tuple) and len(size) == 3:
@@ -34,7 +33,7 @@ class Landscape:
         self.sources: list[Source] = []
     
     def plot(self, z = 0):
-        """_Plot a slice of the world at a height z._
+        """Plot a slice of the world at a height `z`.
 
         Args:
             z (int, optional): Height of slice. Defaults to 0.
@@ -78,7 +77,14 @@ class Landscape:
         return fig, ax
 
     def add_sources(self, *sources: Source):
-        """Add one or more point sources to the world."""
+        """Add one or more point sources to the world.
+
+        Args:
+            *sources (pg_rad.objects.Source): One or more sources, passed as
+            Source1, Source2, ...
+        Raises:
+            ValueError: If the source is outside the boundaries of the landscape.
+        """        
 
         max_x, max_y, max_z = self.world.shape[:3]
 
@@ -88,23 +94,26 @@ class Landscape:
                  0 <= source.z < max_z)
             for source in sources
         ):
-            raise ValueError("One or more sources are outside the world boundaries.")
+            raise ValueError("One or more sources are outside the landscape!")
 
         self.sources.extend(sources)
 
     def set_path(self, path: Path):
+        """
+        Set the path in the landscape.
+        """
         self.path = path
     
 def create_landscape_from_path(path: Path, max_z = 500):
-    """_Generate a Landscape from a path, using its dimensions to determine
-    the size of the Landscape._
+    """Generate a landscape from a path, using its dimensions to determine
+    the size of the landscape.
 
     Args:
         path (Path): A Path object describing the trajectory.
         max_z (int, optional): Height of the world. Defaults to 500 meters.
 
     Returns:
-        Landscape: A Landscape with dimensions based on the provided Path.
+        landscape (pg_rad.landscape.Landscape): A landscape with dimensions based on the provided Path.
     """    
     max_x = np.ceil(max(path.x_list))
     max_y = np.ceil(max(path.y_list))

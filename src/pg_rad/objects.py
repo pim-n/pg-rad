@@ -11,6 +11,16 @@ class Object:
             z: float,
             name: str = "Unnamed object",
             color: str = 'grey'):
+        """
+        A generic object.
+
+        Args:
+            x (float): X coordinate.
+            y (float): Y coordinate.
+            z (float): Z coordinate.
+            name (str, optional): Name for the object. Defaults to "Unnamed object".
+            color (str, optional): Matplotlib compatible color string. Defaults to "red".
+        """
         
         self.x = x
         self.y = y
@@ -35,7 +45,7 @@ class Source(Object):
             isotope: Isotope,
             name: str | None = None,
             color: str = "red"):
-        """_A point source._
+        """A point source.
 
         Args:
             x (float): X coordinate.
@@ -47,7 +57,8 @@ class Source(Object):
             Defaults to None, making the name sequential.
             (Source-1, Source-2, etc.).
             color (str, optional): Matplotlib compatible color string. Defaults to "red".
-        """        
+        """
+        
         self.id = Source._id_counter
         Source._id_counter += 1
 

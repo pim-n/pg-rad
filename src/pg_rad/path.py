@@ -13,11 +13,11 @@ logger = setup_logger(__name__)
 
 class PathSegment:
     def __init__(self, a: tuple[float, float], b: tuple[float, float]):
-        """_A straight Segment of a Path, from (x_a, y_a) to (x_b, y_b)._
+        """A straight Segment of a Path, from (x_a, y_a) to (x_b, y_b).
 
         Args:
-            a (tuple[float, float]): _The starting point (x_a, y_a)._
-            b (tuple[float, float]): _The final point (x_b, y_b)._
+            a (tuple[float, float]): The starting point (x_a, y_a).
+            b (tuple[float, float]): The final point (x_b, y_b).
         """        
         self.a = a
         self.b = b
@@ -45,7 +45,7 @@ class Path:
             z: float = 0,
             simplify_path = False
                  ):
-        """_Construct a path of sequences based on a list of coordinates._
+        """Construct a path of sequences based on a list of coordinates.
 
         Args:
             coord_list (Sequence[tuple[float, float]]): List of x,y coordinates.
@@ -95,7 +95,7 @@ def piecewise_regression_on_path(
         keep_endpoints_equal: bool = False,
         n_breakpoints: int = 3
         ):
-    """_Take a Path object and return a piece-wise linear approximated Path._
+    """From full resolution x and y arrays, return a piecewise linearly approximated/simplified pair of x and y arrays.
 
     This function uses the `piecewise_regression` package. From a full set of
     coordinate pairs, the function fits linear sections, automatically finding
@@ -119,8 +119,11 @@ def piecewise_regression_on_path(
         n_breakpoints (int, optional): Number of breakpoints. Defaults to 3.
 
     Returns:
-        x (Sequence[float]): _Reduced list of x coordinates._
-        y (Sequence[float]): _Reduced list of y coordinates._
+        x (list[float]): Reduced list of x coordinates.
+        y (list[float]): Reduced list of y coordinates.
+
+    Raises:
+        ConvergenceError: If the fitting algorithm failed to simplify the path.
 
     Reference:
         Pilgrim, C., (2021). piecewise-regression (aka segmented regression) in Python. Journal of Open Source Software, 6(68), 3859, https://doi.org/10.21105/joss.03859.
@@ -163,11 +166,10 @@ def path_from_RT90(
         north_col: str = "North",
         **kwargs
         ) -> Path:
-    
-    """_Construct a path from East and North formatted coordinates (RT90) in a Pandas DataFrame._
+    """Construct a path from East and North formatted coordinates (RT90) in a Pandas DataFrame.
 
     Args:
-        df (pd.DataFrame): DataFrame containing at least the two columns noted in the cols argument.
+        df (pandas.DataFrame): DataFrame containing at least the two columns noted in the cols argument.
         east_col (str): The column name for the East coordinates.
         north_col (str): The column name for the North coordinates.
 
