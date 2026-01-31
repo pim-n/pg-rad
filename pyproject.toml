@@ -29,4 +29,4 @@ Homepage = "https://github.com/pim-n/pg-rad"
 Issues = "https://github.com/pim-n/pg-rad/issues"
 
 [project.optional-dependencies]
-dev = ["pytest", "notebook", "mkdocs-material", "mkdocstrings-python", "mkdocs-jupyter"]
+dev = ["pytest", "mkinit", "notebook", "mkdocs-material", "mkdocstrings-python", "mkdocs-jupyter"]
