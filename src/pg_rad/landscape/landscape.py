@@ -5,7 +5,7 @@ from matplotlib.patches import Circle
 import numpy as np
 
 from pg_rad.path import Path
-from pg_rad.sources import PointSource
+from pg_rad.objects import PointSource
 
 logger = logging.getLogger(__name__)
 
