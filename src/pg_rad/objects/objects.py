@@ -1,7 +1,7 @@
 import math
 from typing import Self
 
-class Object:
+class BaseObject:
     def __init__(
             self,
             x: float,
