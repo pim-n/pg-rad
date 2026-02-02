@@ -1,11 +1,11 @@
 import logging
 
-from .objects import Object
+from .objects import BaseObject
 from pg_rad.isotopes import Isotope
 
 logger = logging.getLogger(__name__)
 
-class PointSource(Object):
+class PointSource(BaseObject):
     _id_counter = 1
     def __init__(
             self,
