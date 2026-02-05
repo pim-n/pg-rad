@@ -6,6 +6,7 @@ from pg_rad.exceptions import DataLoadError, InvalidCSVError
 
 logger = logging.getLogger(__name__)
 
+
 def load_data(filename: str) -> pd.DataFrame:
     logger.debug(f"Attempting to load file: {filename}")
 

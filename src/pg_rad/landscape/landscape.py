@@ -9,26 +9,29 @@ from pg_rad.objects import PointSource
 
 logger = logging.getLogger(__name__)
 
+
 class Landscape:
     """A generic Landscape that can contain a Path and sources.
 
     Args:
-        air_density (float, optional): Air density in kg / m^3. Defaults to 1.243.
-        size (int | tuple[int, int, int], optional): Size of the world. Defaults to 500.
-        scale (str, optional): The scale of the size argument passed. Defaults to 'meters'.
-    """    
+        air_density (float, optional): Air density, kg/m^3. Defaults to 1.243.
+        size (int | tuple[int, int, int], optional): Size of the world.
+        Defaults to 500.
+        scale (str, optional): The scale of the size argument passed.
+        Defaults to 'meters'.
+    """
     def __init__(
             self,
             air_density: float = 1.243,
             size: int | tuple[int, int, int] = 500,
-            scale = 'meters',
-            ):    
+            scale: str = 'meters'
+            ):
         if isinstance(size, int):
             self.world = np.zeros((size, size, size))
         elif isinstance(size, tuple) and len(size) == 3:
             self.world = np.zeros(size)
         else:
-            raise TypeError("size must be an integer or a tuple of 3 integers.")
+            raise TypeError("size must be integer or a tuple of 3 integers.")
 
         self.air_density = air_density
         self.scale = scale
@@ -36,8 +39,8 @@ class Landscape:
         self.path: Path = None
         self.sources: list[PointSource] = []
         logger.debug("Landscape initialized.")
-    
-    def plot(self, z = 0):
+
+    def plot(self, z: float | int = 0):
         """Plot a slice of the world at a height `z`.
 
         Args:
@@ -45,7 +48,7 @@ class Landscape:
 
         Returns:
             fig, ax: Matplotlib figure objects.
-        """        
+        """
         x_lim, y_lim, _ = self.world.shape
 
         fig, ax = plt.subplots()
@@ -54,9 +57,9 @@ class Landscape:
         ax.set_xlabel(f"X [{self.scale}]")
         ax.set_ylabel(f"Y [{self.scale}]")
 
-        if not self.path == None:
+        if self.path is not None:
             ax.plot(self.path.x_list, self.path.y_list, 'bo-')
-        
+
         for s in self.sources:
             if np.isclose(s.z, z):
                 dot = Circle(
@@ -78,19 +81,19 @@ class Landscape:
                 )
 
                 ax.add_patch(dot)
-                
+
         return fig, ax
 
     def add_sources(self, *sources: PointSource):
         """Add one or more point sources to the world.
 
         Args:
-            *sources (pg_rad.sources.PointSource): One or more sources, passed as
-            Source1, Source2, ...
+            *sources (pg_rad.sources.PointSource): One or more sources,
+            passed as Source1, Source2, ...
         Raises:
-            ValueError: If the source is outside the boundaries of the landscape.
-        """        
-
+            ValueError: If the source is outside the boundaries of the
+            landscape.
+        """
         max_x, max_y, max_z = self.world.shape[:3]
 
         if any(
@@ -108,24 +111,23 @@ class Landscape:
         Set the path in the landscape.
         """
         self.path = path
-    
-def create_landscape_from_path(path: Path, max_z = 500):
+
+
+def create_landscape_from_path(path: Path, max_z: float | int = 50):
     """Generate a landscape from a path, using its dimensions to determine
     the size of the landscape.
 
     Args:
         path (Path): A Path object describing the trajectory.
-        max_z (int, optional): Height of the world. Defaults to 500 meters.
+        max_z (int, optional): Height of the world. Defaults to 50 meters.
 
     Returns:
-        landscape (pg_rad.landscape.Landscape): A landscape with dimensions based on the provided Path.
-    """    
+        landscape (pg_rad.landscape.Landscape): A landscape with dimensions
+        based on the provided Path.
+    """
     max_x = np.ceil(max(path.x_list))
     max_y = np.ceil(max(path.y_list))
 
-    landscape = Landscape(
-        size = (max_x, max_y, max_z)
-        )
-    
+    landscape = Landscape(size=(max_x, max_y, max_z))
     landscape.path = path
     return landscape

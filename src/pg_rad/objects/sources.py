@@ -5,8 +5,10 @@ from pg_rad.isotopes import Isotope
 
 logger = logging.getLogger(__name__)
 
+
 class PointSource(BaseObject):
     _id_counter = 1
+
     def __init__(
             self,
             x: float,
@@ -27,9 +29,10 @@ class PointSource(BaseObject):
             name (str | None, optional): Can give the source a unique name.
             Defaults to None, making the name sequential.
             (Source-1, Source-2, etc.).
-            color (str, optional): Matplotlib compatible color string. Defaults to "red".
+            color (str, optional): Matplotlib compatible color string.
+            Defaults to "red".
         """
-        
+
         self.id = PointSource._id_counter
         PointSource._id_counter += 1
 
@@ -42,8 +45,13 @@ class PointSource(BaseObject):
         self.activity = activity
         self.isotope = isotope
         self.color = color
-        
+
         logger.debug(f"Source created: {self.name}")
 
     def __repr__(self):
-        return f"PointSource(name={self.name}, pos={(self.x, self.y, self.z)}, isotope={self.isotope.name}, A={self.activity} MBq)"
+        repr_str = (f"PointSource(name={self.name}, "
+                    + f"pos={(self.x, self.y, self.z)}, "
+                    + f"A={self.activity} MBq), "
+                    + f"isotope={self.isotope.name}.")
+
+        return repr_str
