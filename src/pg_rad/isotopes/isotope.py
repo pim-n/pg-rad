@@ -5,7 +5,7 @@ class Isotope:
         name (str): Full name (e.g. Caesium-137).
         E (float): Energy of the primary gamma in keV.
         b (float): Branching ratio for the gamma at energy E.
-    """  
+    """
     def __init__(
             self,
             name: str,
