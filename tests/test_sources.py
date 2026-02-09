@@ -1,27 +1,36 @@
 import numpy as np
 import pytest
 
-from pg_rad.sources import PointSource
+from pg_rad.objects import PointSource
+from pg_rad.isotopes import Isotope
+
 
 @pytest.fixture
 def test_sources():
+    iso = Isotope("test", E=662, b=0)
     pos_a = np.random.rand(3)
     pos_b = np.random.rand(3)
 
-    a = PointSource(*tuple(pos_a), strength = None)
-    b = PointSource(*tuple(pos_b), strength = None)
+    a = PointSource(pos_a, activity=None, isotope=iso)
+    b = PointSource(pos_b, activity=None, isotope=iso)
 
     return pos_a, pos_b, a, b
 
+
 def test_if_distances_equal(test_sources):
-    """Verify whether from PointSource A to PointSource B is the same as B to A."""
+    """
+    Verify whether distance from PointSource A to B is the same as B to A.
+    """
 
     _, _, a, b = test_sources
 
     assert a.distance_to(b) == b.distance_to(a)
 
+
 def test_distance_calculation(test_sources):
-    """Verify whether distance between two PointSources is calculated correctly."""
+    """
+    Verify whether distance between PointSources is calculated correctly.
+    """
 
     pos_a, pos_b, a, b = test_sources
 
@@ -32,4 +41,4 @@ def test_distance_calculation(test_sources):
     assert np.isclose(
         a.distance_to(b),
         np.sqrt(dx**2 + dy**2 + dz**2),
-        rtol = 1e-12)
+        rtol=1e-12)
