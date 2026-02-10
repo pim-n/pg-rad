@@ -25,7 +25,7 @@ def phi_single_source(
 
     # Linear photon attenuation coefficient in m^-1.
     mu_mass_air *= 0.1
-    mu_air = 0.1 * mu_mass_air * air_density
+    mu_air = mu_mass_air * air_density
 
     phi = (
         activity
