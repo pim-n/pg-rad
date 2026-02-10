@@ -11,9 +11,7 @@ class PointSource(BaseObject):
 
     def __init__(
             self,
-            x: float,
-            y: float,
-            z: float,
+            pos: tuple,
             activity: int,
             isotope: Isotope,
             name: str | None = None,
@@ -21,9 +19,7 @@ class PointSource(BaseObject):
         """A point source.
 
         Args:
-            x (float): X coordinate.
-            y (float): Y coordinate.
-            z (float): Z coordinate.
+            pos (tuple): a position vector of length 3 (x,y,z).
             activity (int): Activity A in MBq.
             isotope (Isotope): The isotope.
             name (str | None, optional): Can give the source a unique name.
@@ -40,11 +36,10 @@ class PointSource(BaseObject):
         if name is None:
             name = f"Source {self.id}"
 
-        super().__init__(x, y, z, name, color)
+        super().__init__(pos, name, color)
 
         self.activity = activity
         self.isotope = isotope
-        self.color = color
 
         logger.debug(f"Source created: {self.name}")
 
