@@ -5,6 +5,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"pg_rad.data" = ["*.csv"]
+
 [project]
 name = "pg-rad"
 version = "0.2.1"
@@ -18,7 +21,6 @@ dependencies = [
     "matplotlib>=3.9.2",
     "numpy>=2",
     "pandas>=2.3.1",
-    "piecewise_regression==1.5.0",
     "pyyaml>=6.0.2"
 ]
 license = "MIT"
