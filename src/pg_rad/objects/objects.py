@@ -6,7 +6,7 @@ import numpy as np
 class BaseObject:
     def __init__(
             self,
-            pos: tuple[float, float, float],
+            pos: tuple[float, float, float] = (0, 0, 0),
             name: str = "Unnamed object",
             color: str = 'grey'):
         """
