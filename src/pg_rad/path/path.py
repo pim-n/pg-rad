@@ -70,6 +70,11 @@ class Path:
             ]
 
         self.z = z
+        self.size = (
+            np.ceil(max(self.x_list)),
+            np.ceil(max(self.y_list)),
+            z
+        )
 
         logger.debug("Path created.")
 
