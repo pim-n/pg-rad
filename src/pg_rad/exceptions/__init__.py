@@ -4,7 +4,7 @@ __ignore__ = ["logger"]
 from pg_rad.exceptions import exceptions
 
 from pg_rad.exceptions.exceptions import (ConvergenceError, DataLoadError,
-                                          InvalidCSVError,)
+                                          InvalidCSVError, OutOfBoundsError,)
 
 __all__ = ['ConvergenceError', 'DataLoadError', 'InvalidCSVError',
-           'exceptions']
+           'OutOfBoundsError', 'exceptions']
