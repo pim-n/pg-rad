@@ -13,77 +13,34 @@ logger = logging.getLogger(__name__)
 
 
 class Landscape:
-    """A generic Landscape that can contain a Path and sources.
-
-    Args:
-        air_density (float, optional): Air density, kg/m^3. Defaults to 1.243.
-        size (int | tuple[int, int, int], optional): Size of the world.
-        Defaults to 500.
-        scale (str, optional): The scale of the size argument passed.
-        Defaults to 'meters'.
+    """
+    A generic Landscape that can contain a Path and sources.
     """
     def __init__(
             self,
-            air_density: float = 1.243,
-            size: int | tuple[int, int, int] = 500,
-            scale: str = 'meters'
+            path: Path,
+            point_sources: list[PointSource] = [],
+            size: tuple[int, int, int] = [500, 500, 50],
+            air_density: float = 1.243
             ):
-        if isinstance(size, int):
-            self.world = np.zeros((size, size, size))
-        elif isinstance(size, tuple) and len(size) == 3:
-            self.world = np.zeros(size)
-        else:
-            raise TypeError("size must be integer or a tuple of 3 integers.")
-
-        self.air_density = air_density
-        self.scale = scale
-        self.path: Path = None
-        self.sources: list[PointSource] = []
-        logger.debug("Landscape initialized.")
-
-    def plot(self, z: float | int = 0):
-        """Plot a slice of the world at a height `z`.
+        """Initialize a landscape.
 
         Args:
-            z (int, optional): Height of slice. Defaults to 0.
+            path (Path): A Path object.
+            point_sources (list[PointSource], optional): List of point sources.
+            air_density (float, optional): Air density in kg/m^3. Defaults to 1.243.
+            size (tuple[int, int, int], optional): (x,y,z) dimensions of world in meters. Defaults to [500, 500, 50].
 
-        Returns:
-            fig, ax: Matplotlib figure objects.
+        Raises:
+            TypeError: _description_
         """
-        x_lim, y_lim, _ = self.world.shape
 
-        fig, ax = plt.subplots()
-        ax.set_xlim(right=x_lim)
-        ax.set_ylim(top=y_lim)
-        ax.set_xlabel(f"X [{self.scale}]")
-        ax.set_ylabel(f"Y [{self.scale}]")
+        self.path = path
+        self.point_sources = point_sources
+        self.size = size
+        self.air_density = air_density
 
-        if self.path is not None:
-            ax.plot(self.path.x_list, self.path.y_list, 'bo-')
-
-        for s in self.sources:
-            if np.isclose(s.z, z):
-                dot = Circle(
-                        (s.x, s.y),
-                        radius=5,
-                        color=s.color,
-                        zorder=5
-                )
-
-                ax.text(
-                    s.x + 0.06,
-                    s.y + 0.06,
-                    s.name,
-                    color=s.color,
-                    fontsize=10,
-                    ha="left",
-                    va="bottom",
-                    zorder=6
-                )
-
-                ax.add_patch(dot)
-
-        return fig, ax
+        logger.debug("Landscape initialized.")
 
     def add_sources(self, *sources: PointSource):
         """Add one or more point sources to the world.
@@ -150,3 +107,8 @@ def create_landscape_from_path(path: Path, max_z: float | int = 50):
     landscape = Landscape(size=(max_x, max_y, max_z))
     landscape.path = path
     return landscape
+
+
+class LandscapeBuilder:
+    def __init__(self):
+        pass
