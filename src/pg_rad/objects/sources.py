@@ -11,26 +11,23 @@ class PointSource(BaseObject):
 
     def __init__(
             self,
-            x: float,
-            y: float,
-            z: float,
             activity: int,
             isotope: Isotope,
+            pos: tuple[float, float, float] = (0, 0, 0),
             name: str | None = None,
-            color: str = "red"):
+            color: str = 'red'
+            ):
         """A point source.
 
         Args:
-            x (float): X coordinate.
-            y (float): Y coordinate.
-            z (float): Z coordinate.
             activity (int): Activity A in MBq.
             isotope (Isotope): The isotope.
-            name (str | None, optional): Can give the source a unique name.
-            Defaults to None, making the name sequential.
-            (Source-1, Source-2, etc.).
-            color (str, optional): Matplotlib compatible color string.
-            Defaults to "red".
+            pos (tuple[float, float, float], optional):
+                Position of the PointSource.
+            name (str, optional): Can give the source a unique name.
+                If not provided, point sources are sequentially
+                named: Source1, Source2, ...
+            color (str, optional): Matplotlib compatible color string
         """
 
         self.id = PointSource._id_counter
@@ -40,11 +37,10 @@ class PointSource(BaseObject):
         if name is None:
             name = f"Source {self.id}"
 
-        super().__init__(x, y, z, name, color)
+        super().__init__(pos, name, color)
 
         self.activity = activity
         self.isotope = isotope
-        self.color = color
 
         logger.debug(f"Source created: {self.name}")
 

@@ -42,14 +42,18 @@ class Path:
     def __init__(
             self,
             coord_list: Sequence[tuple[float, float]],
-            z: float = 0
+            z: float = 0.,
+            z_box: float = 50.
                  ):
         """Construct a path of sequences based on a list of coordinates.
 
         Args:
             coord_list (Sequence[tuple[float, float]]): List of x,y
             coordinates.
-            z (float, optional): Height of the path. Defaults to 0.
+            z (float, optional): position of the path in z-direction in meters.
+                Defaults to 0 meters.
+            z_box (float, optional): How much empty space to set
+                above the path in meters. Defaults to 50 meters.
         """
 
         if len(coord_list) < 2:
@@ -70,6 +74,11 @@ class Path:
             ]
 
         self.z = z
+        self.size = (
+            np.ceil(max(self.x_list)),
+            np.ceil(max(self.y_list)),
+            z + z_box
+        )
 
         logger.debug("Path created.")
 

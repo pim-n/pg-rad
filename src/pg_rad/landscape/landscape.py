@@ -1,133 +1,161 @@
 import logging
+from typing import Self
 
-from matplotlib import pyplot as plt
-from matplotlib.patches import Circle
-import numpy as np
-
-from pg_rad.path import Path
+from pg_rad.dataloader import load_data
+from pg_rad.exceptions import OutOfBoundsError
 from pg_rad.objects import PointSource
+from pg_rad.path import Path, path_from_RT90
+from pg_rad.physics.fluence import phi_single_source
 
 logger = logging.getLogger(__name__)
 
 
 class Landscape:
-    """A generic Landscape that can contain a Path and sources.
-
-    Args:
-        air_density (float, optional): Air density, kg/m^3. Defaults to 1.243.
-        size (int | tuple[int, int, int], optional): Size of the world.
-        Defaults to 500.
-        scale (str, optional): The scale of the size argument passed.
-        Defaults to 'meters'.
+    """
+    A generic Landscape that can contain a Path and sources.
     """
     def __init__(
             self,
-            air_density: float = 1.243,
-            size: int | tuple[int, int, int] = 500,
-            scale: str = 'meters'
+            name: str,
+            path: Path,
+            point_sources: list[PointSource] = [],
+            size: tuple[int, int, int] = [500, 500, 50],
+            air_density: float = 1.243
             ):
-        if isinstance(size, int):
-            self.world = np.zeros((size, size, size))
-        elif isinstance(size, tuple) and len(size) == 3:
-            self.world = np.zeros(size)
-        else:
-            raise TypeError("size must be integer or a tuple of 3 integers.")
-
-        self.air_density = air_density
-        self.scale = scale
-
-        self.path: Path = None
-        self.sources: list[PointSource] = []
-        logger.debug("Landscape initialized.")
-
-    def plot(self, z: float | int = 0):
-        """Plot a slice of the world at a height `z`.
+        """Initialize a landscape.
 
         Args:
-            z (int, optional): Height of slice. Defaults to 0.
+            path (Path): A Path object.
+            point_sources (list[PointSource], optional): List of point sources.
+            air_density (float, optional): Air density in kg/m^3.
+                Defaults to 1.243.
+            size (tuple[int, int, int], optional): (x,y,z) dimensions of world
+                in meters. Defaults to [500, 500, 50].
 
-        Returns:
-            fig, ax: Matplotlib figure objects.
+        Raises:
+            TypeError: _description_
         """
-        x_lim, y_lim, _ = self.world.shape
 
-        fig, ax = plt.subplots()
-        ax.set_xlim(right=x_lim)
-        ax.set_ylim(top=y_lim)
-        ax.set_xlabel(f"X [{self.scale}]")
-        ax.set_ylabel(f"Y [{self.scale}]")
+        self.name = name
+        self.path = path
+        self.point_sources = point_sources
+        self.size = size
+        self.air_density = air_density
 
-        if self.path is not None:
-            ax.plot(self.path.x_list, self.path.y_list, 'bo-')
+        logger.debug(f"Landscape created: {self.name}")
 
-        for s in self.sources:
-            if np.isclose(s.z, z):
-                dot = Circle(
-                        (s.x, s.y),
-                        radius=5,
-                        color=s.color,
-                        zorder=5
+    def calculate_fluence_at(self, pos: tuple):
+        total_phi = 0.
+        for source in self.point_sources:
+            r = source.distance_to(pos)
+            phi_source = phi_single_source(
+                r=r,
+                activity=source.activity,
+                branching_ratio=source.isotope.b,
+                mu_mass_air=source.isotope.mu_mass_air,
+                air_density=self.air_density
+            )
+            total_phi += phi_source
+        return total_phi
+
+    def calculate_fluence_along_path(self):
+        pass
+
+
+class LandscapeBuilder:
+    def __init__(self, name: str = "Unnamed landscape"):
+        self.name = name
+        self._path = None
+        self._point_sources = []
+        self._size = None
+        self._air_density = None
+
+        logger.debug(f"LandscapeBuilder initialized: {self.name}")
+
+    def set_air_density(self, air_density) -> Self:
+        """Set the air density of the world."""
+        self._air_density = air_density
+        return self
+
+    def set_landscape_size(self, size: tuple[int, int, int]) -> Self:
+        """Set the size of the landscape in meters (x,y,z)."""
+        if self._path and any(p > s for p, s in zip(self._path.size, size)):
+            raise OutOfBoundsError(
+                "Cannot set landscape size smaller than the path."
+            )
+
+        self._size = size
+        logger.debug("Size of the landscape has been updated.")
+
+        return self
+
+    def set_path_from_experimental_data(
+        self,
+        filename: str,
+        z: int,
+        east_col: str = "East",
+        north_col: str = "North"
+    ) -> Self:
+        df = load_data(filename)
+        self._path = path_from_RT90(
+            df=df,
+            east_col=east_col,
+            north_col=north_col,
+            z=z
+        )
+
+        # The size of the landscape will be updated if
+        # 1) _size is not set, or
+        # 2) _size is too small to contain the path.
+        needs_resize = (
+            not self._size
+            or any(p > s for p, s in zip(self._path.size, self._size))
+        )
+
+        if needs_resize:
+            if not self._size:
+                logger.debug("Because no Landscape size was set, "
+                             "it will now set to path dimensions.")
+            else:
+                logger.warning(
+                    "Path exceeds current landscape size. "
+                    "Landscape size will be expanded to accommodate path."
                 )
 
-                ax.text(
-                    s.x + 0.06,
-                    s.y + 0.06,
-                    s.name,
-                    color=s.color,
-                    fontsize=10,
-                    ha="left",
-                    va="bottom",
-                    zorder=6
-                )
+            self.set_landscape_size(self._path.size)
 
-                ax.add_patch(dot)
+        return self
 
-        return fig, ax
-
-    def add_sources(self, *sources: PointSource):
+    def set_point_sources(self, *sources):
         """Add one or more point sources to the world.
 
         Args:
             *sources (pg_rad.sources.PointSource): One or more sources,
             passed as Source1, Source2, ...
         Raises:
-            ValueError: If the source is outside the boundaries of the
+            OutOfBoundsError: If any source is outside the boundaries of the
             landscape.
         """
-        max_x, max_y, max_z = self.world.shape[:3]
 
         if any(
-            not (0 <= source.x < max_x and
-                 0 <= source.y < max_y and
-                 0 <= source.z < max_z)
+            any(p < 0 or p >= s for p, s in zip(source.pos, self._size))
             for source in sources
         ):
-            raise ValueError("One or more sources are outside the landscape!")
+            raise OutOfBoundsError(
+                "One or more sources attempted to "
+                "be placed outside the landscape."
+                )
 
-        self.sources.extend(sources)
+        self._point_sources = sources
 
-    def set_path(self, path: Path):
-        """
-        Set the path in the landscape.
-        """
-        self.path = path
+    def build(self):
+        landscape = Landscape(
+            name=self.name,
+            path=self._path,
+            point_sources=self._point_sources,
+            size=self._size,
+            air_density=self._air_density
+        )
 
-
-def create_landscape_from_path(path: Path, max_z: float | int = 50):
-    """Generate a landscape from a path, using its dimensions to determine
-    the size of the landscape.
-
-    Args:
-        path (Path): A Path object describing the trajectory.
-        max_z (int, optional): Height of the world. Defaults to 50 meters.
-
-    Returns:
-        landscape (pg_rad.landscape.Landscape): A landscape with dimensions
-        based on the provided Path.
-    """
-    max_x = np.ceil(max(path.x_list))
-    max_y = np.ceil(max(path.y_list))
-
-    landscape = Landscape(size=(max_x, max_y, max_z))
-    landscape.path = path
-    return landscape
+        logger.info(f"Landscape built successfully: {landscape.name}")
+        return landscape

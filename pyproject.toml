@@ -7,6 +7,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "pg_rad.data" = ["*.csv"]
+"pg_rad.configs" = ["*.yml"]
 
 [project]
 name = "pg-rad"
@@ -21,14 +22,19 @@ dependencies = [
     "matplotlib>=3.9.2",
     "numpy>=2",
     "pandas>=2.3.1",
-    "pyyaml>=6.0.2"
+    "pyyaml>=6.0.2",
+    "scipy>=1.15.0"
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
+
+[project.scripts]
+pgrad = "pg_rad.main:main"
 
 [project.urls]
 Homepage = "https://github.com/pim-n/pg-rad"
 Issues = "https://github.com/pim-n/pg-rad/issues"
 
 [project.optional-dependencies]
+
 dev = ["pytest", "mkinit", "notebook", "mkdocs-material", "mkdocstrings-python", "mkdocs-jupyter"]

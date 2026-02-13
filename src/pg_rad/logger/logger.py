@@ -1,7 +1,9 @@
-import logging
-import pathlib
+import logging.config
+from importlib.resources import files
 
 import yaml
+
+from pg_rad.configs.filepaths import LOGGING_CONFIG
 
 
 def setup_logger(log_level: str = "WARNING"):
@@ -10,8 +12,7 @@ def setup_logger(log_level: str = "WARNING"):
     if log_level not in levels:
         raise ValueError(f"Log level must be one of {levels}.")
 
-    base_dir = pathlib.Path(__file__).resolve().parent
-    config_file = base_dir / "configs" / "logging.yml"
+    config_file = files('pg_rad.configs').joinpath(LOGGING_CONFIG)
 
     with open(config_file) as f:
         config = yaml.safe_load(f)
