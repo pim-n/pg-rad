@@ -7,6 +7,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "pg_rad.data" = ["*.csv"]
+"pg_rad.configs" = ["*.yml"]
 
 [project]
 name = "pg-rad"
@@ -25,6 +26,9 @@ dependencies = [
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
+
+[project.scripts]
+pgrad = "pg_rad.main:main"
 
 [project.urls]
 Homepage = "https://github.com/pim-n/pg-rad"

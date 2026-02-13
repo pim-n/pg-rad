@@ -31,6 +31,14 @@ With the virtual environment activated, run:
 pip install -e .[dev]
 ```
 
+## Running example landscape
+
+The example landscape can be generated using the command-line interface. Still in the virtual environment, run
+
+```
+pgrad --test --loglevel DEBUG
+```
+
 ## Tests
 
 Tests can be run with `pytest` from the root directory of the repository. With the virtual environment activated, run:
