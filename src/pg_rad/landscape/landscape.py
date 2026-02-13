@@ -46,7 +46,7 @@ class Landscape:
 
     def calculate_fluence_at(self, pos: tuple):
         total_phi = 0.
-        for source in self.sources:
+        for source in self.point_sources:
             r = source.distance_to(pos)
             phi_source = phi_single_source(
                 r=r,

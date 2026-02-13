@@ -2,17 +2,17 @@ import numpy as np
 import pytest
 
 from pg_rad.objects import PointSource
-from pg_rad.isotopes import Isotope
+from pg_rad.isotopes import CS137
 
 
 @pytest.fixture
 def test_sources():
-    iso = Isotope("test", E=662, b=0)
+    iso = CS137()
     pos_a = np.random.rand(3)
     pos_b = np.random.rand(3)
 
-    a = PointSource(pos_a, activity=None, isotope=iso)
-    b = PointSource(pos_b, activity=None, isotope=iso)
+    a = PointSource(pos=pos_a, activity=None, isotope=iso)
+    b = PointSource(pos=pos_b, activity=None, isotope=iso)
 
     return pos_a, pos_b, a, b
 

@@ -2,9 +2,7 @@ from math import dist, exp, pi
 
 import pytest
 
-from pg_rad.isotopes import CS137
-from pg_rad.landscape import Landscape
-from pg_rad.objects import PointSource
+from pg_rad.landscape import LandscapeDirector
 
 
 @pytest.fixture
@@ -27,12 +25,7 @@ def phi_ref():
 
 @pytest.fixture
 def test_landscape():
-    landscape = Landscape()
-    source = PointSource(
-        pos=(0, 0, 0),
-        activity=100E9,
-        isotope=CS137)
-    landscape.add_sources(source)
+    landscape = LandscapeDirector().build_test_landscape()
     return landscape
 
 

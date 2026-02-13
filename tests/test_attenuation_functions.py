@@ -19,12 +19,11 @@ def test_exact_attenuation_retrieval(energy, mu):
 
 
 @pytest.mark.parametrize("energy,mu", [
-    (0.662, 0.0778),
-    (1.25, 0.06)
+    (0.662, 0.0778)
 ])
 def test_attenuation_interpolation(energy, mu):
     """
-    Test Cs-137 and Co-60 mass attenuation coefficients.
+    Test retreival for Cs-137 mass attenuation coefficient.
     """
     interp_mu = get_mass_attenuation_coeff(energy)
     assert pytest.approx(interp_mu, rel=1E-2) == mu

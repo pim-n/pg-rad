@@ -14,7 +14,7 @@ class LandscapeDirector:
 
     def build_test_landscape(self):
         fp = files('pg_rad.data').joinpath(TEST_EXP_DATA)
-        source = PointSource(activity=100, isotope=CS137(), pos=(0, 0, 0))
+        source = PointSource(activity=100E9, isotope=CS137(), pos=(0, 0, 0))
         lb = LandscapeBuilder("Test landscape")
         lb.set_air_density(1.243)
         lb.set_path_from_experimental_data(fp, z=0)
