@@ -16,6 +16,7 @@ class Landscape:
     """
     def __init__(
             self,
+            name: str,
             path: Path,
             point_sources: list[PointSource] = [],
             size: tuple[int, int, int] = [500, 500, 50],
@@ -35,12 +36,13 @@ class Landscape:
             TypeError: _description_
         """
 
+        self.name = name
         self.path = path
         self.point_sources = point_sources
         self.size = size
         self.air_density = air_density
 
-        logger.debug("Landscape initialized.")
+        logger.debug(f"Landscape created: {self.name}")
 
     def calculate_fluence_at(self, pos: tuple):
         total_phi = 0.
@@ -61,11 +63,14 @@ class Landscape:
 
 
 class LandscapeBuilder:
-    def __init__(self):
+    def __init__(self, name: str = "Unnamed landscape"):
+        self.name = name
         self._path = None
         self._point_sources = []
         self._size = None
         self._air_density = None
+
+        logger.debug(f"LandscapeBuilder initialized: {self.name}")
 
     def set_air_density(self, air_density) -> Self:
         """Set the air density of the world."""
@@ -95,7 +100,8 @@ class LandscapeBuilder:
         self._path = path_from_RT90(
             df=df,
             east_col=east_col,
-            north_col=north_col
+            north_col=north_col,
+            z=z
         )
 
         # The size of the landscape will be updated if
@@ -108,11 +114,12 @@ class LandscapeBuilder:
 
         if needs_resize:
             if not self._size:
-                logger.info("Landscape size set to path dimensions.")
+                logger.debug("Because no Landscape size was set, "
+                             "it will now set to path dimensions.")
             else:
                 logger.warning(
                     "Path exceeds current landscape size. "
-                    "Expanding landscape to accommodate it."
+                    "Landscape size will be expanded to accommodate path."
                 )
 
             self.set_landscape_size(self._path.size)
@@ -142,9 +149,13 @@ class LandscapeBuilder:
         self._point_sources = sources
 
     def build(self):
-        return Landscape(
+        landscape = Landscape(
+            name=self.name,
             path=self._path,
             point_sources=self._point_sources,
             size=self._size,
             air_density=self._air_density
         )
+
+        logger.info(f"Landscape built successfully: {landscape.name}")
+        return landscape
