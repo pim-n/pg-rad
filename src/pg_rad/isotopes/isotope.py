@@ -1,4 +1,4 @@
-from pg_rad.physics import get_mass_attenuation_coeff
+from pg_rad.physics.attenuation import get_mass_attenuation_coeff
 
 
 class Isotope:

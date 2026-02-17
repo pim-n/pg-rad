@@ -1,11 +1,10 @@
 import logging
 from typing import Self
 
-from pg_rad.dataloader import load_data
-from pg_rad.exceptions import OutOfBoundsError
-from pg_rad.objects import PointSource
-from pg_rad.path import Path, path_from_RT90
-from pg_rad.physics.fluence import phi_single_source
+from pg_rad.dataloader.dataloader import load_data
+from pg_rad.exceptions.exceptions import OutOfBoundsError
+from pg_rad.objects.sources import PointSource
+from pg_rad.path.path import Path, path_from_RT90
 
 logger = logging.getLogger(__name__)
 
@@ -43,23 +42,6 @@ class Landscape:
         self.air_density = air_density
 
         logger.debug(f"Landscape created: {self.name}")
-
-    def calculate_fluence_at(self, pos: tuple):
-        total_phi = 0.
-        for source in self.point_sources:
-            r = source.distance_to(pos)
-            phi_source = phi_single_source(
-                r=r,
-                activity=source.activity,
-                branching_ratio=source.isotope.b,
-                mu_mass_air=source.isotope.mu_mass_air,
-                air_density=self.air_density
-            )
-            total_phi += phi_source
-        return total_phi
-
-    def calculate_fluence_along_path(self):
-        pass
 
 
 class LandscapeBuilder:

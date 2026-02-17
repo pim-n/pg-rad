@@ -2,9 +2,9 @@ from importlib.resources import files
 import logging
 
 from pg_rad.configs.filepaths import TEST_EXP_DATA
-from pg_rad.isotopes import CS137
+from pg_rad.isotopes.presets import CS137
 from pg_rad.landscape.landscape import LandscapeBuilder
-from pg_rad.objects import PointSource
+from pg_rad.objects.sources import PointSource
 
 
 class LandscapeDirector:

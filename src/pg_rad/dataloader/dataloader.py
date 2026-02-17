@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from pg_rad.exceptions import DataLoadError, InvalidCSVError
+from pg_rad.exceptions.exceptions import DataLoadError, InvalidCSVError
 
 logger = logging.getLogger(__name__)
 

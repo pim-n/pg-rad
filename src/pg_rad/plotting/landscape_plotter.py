@@ -3,7 +3,7 @@ import logging
 from matplotlib import pyplot as plt
 from matplotlib.patches import Circle
 
-from pg_rad.landscape import Landscape
+from pg_rad.landscape.landscape import Landscape
 
 logger = logging.getLogger(__name__)
 
