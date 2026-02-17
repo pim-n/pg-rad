@@ -36,10 +36,10 @@ class LandscapeSlicePlotter:
         ax.set_aspect("equal")
 
         if save:
-            name = landscape.name.lower().replace(' ', '_')
-            plt.savefig(
-                f"{name}_z{self.z}.png"
-            )
+            landscape_name = landscape.name.lower().replace(' ', '_')
+            filename = f"{landscape_name}_z{self.z}.png"
+            plt.savefig(filename)
+            logger.info("Plot saved to file: "+filename)
 
         if show:
             plt.show()
