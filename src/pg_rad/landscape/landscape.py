@@ -91,11 +91,11 @@ class LandscapeBuilder:
             ds=speed*acquisition_time,
             velocity=speed
         )
-        
+
         x, y = sg.generate(
             segments=segments
         )
-        
+
         self._path = Path(list(zip(x, y)))
         self._fit_landscape_to_path()
         return self
@@ -114,7 +114,7 @@ class LandscapeBuilder:
             north_col=north_col_name,
             z=z
         )
-        
+
         self._fit_landscape_to_path()
 
         return self
