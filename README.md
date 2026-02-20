@@ -1,3 +1,5 @@
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-312/)
+[![Tests](https://github.com/pim-n/pg-rad/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/pim-n/pg-rad/actions/workflows/ci-tests.yml)
 # pg-rad
 Primary Gamma RADiation landscape - Development
 
