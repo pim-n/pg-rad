@@ -2,9 +2,8 @@
 __ignore__ = ["logger"]
 
 from pg_rad.isotopes import isotope
-from pg_rad.isotopes import presets
 
-from pg_rad.isotopes.isotope import (Isotope,)
-from pg_rad.isotopes.presets import (CS137,)
+from pg_rad.isotopes.isotope import (CS137, Isotope, get_isotope,
+                                     preset_isotopes,)
 
-__all__ = ['CS137', 'Isotope', 'isotope', 'presets']
+__all__ = ['CS137', 'Isotope', 'get_isotope', 'isotope', 'preset_isotopes']
