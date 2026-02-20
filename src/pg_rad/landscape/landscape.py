@@ -1,10 +1,13 @@
 import logging
-from typing import Self
+from typing import List, Self
 
 from pg_rad.dataloader.dataloader import load_data
 from pg_rad.exceptions.exceptions import OutOfBoundsError
 from pg_rad.objects.sources import PointSource
 from pg_rad.path.path import Path, path_from_RT90
+
+from road_gen.generators.segmented_road_generator import SegmentedRoadGenerator
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,24 +74,77 @@ class LandscapeBuilder:
 
         return self
 
+    def get_path(self):
+        return self._path
+
+    def set_path_from_segments(
+        self,
+        length: int | float,
+        speed: int | float,
+        acquisition_time: int,
+        segments: List,
+        angles: List,
+        alpha: int | float = None
+    ):
+        sg = SegmentedRoadGenerator(
+            length=length,
+            ds=speed*acquisition_time,
+            velocity=speed
+        )
+        
+        x, y = sg.generate(
+            segments=segments
+        )
+        
+        self._path = Path(list(zip(x, y)))
+        self._fit_landscape_to_path()
+        return self
+
     def set_path_from_experimental_data(
         self,
-        filename: str,
+        file: str,
         z: int,
-        east_col: str = "East",
-        north_col: str = "North"
+        east_col_name: str = "East",
+        north_col_name: str = "North"
     ) -> Self:
-        df = load_data(filename)
+        df = load_data(file)
         self._path = path_from_RT90(
             df=df,
-            east_col=east_col,
-            north_col=north_col,
+            east_col=east_col_name,
+            north_col=north_col_name,
             z=z
         )
+        
+        self._fit_landscape_to_path()
 
-        # The size of the landscape will be updated if
-        # 1) _size is not set, or
-        # 2) _size is too small to contain the path.
+        return self
+
+    def set_point_sources(self, *sources):
+        """Add one or more point sources to the world.
+
+        Args:
+            *sources (pg_rad.sources.PointSource): One or more sources,
+            passed as Source1, Source2, ...
+        Raises:
+            OutOfBoundsError: If any source is outside the boundaries of the
+            landscape.
+        """
+        if any(
+            any(p < 0 or p >= s for p, s in zip(source.pos, self._size))
+            for source in sources
+        ):
+            raise OutOfBoundsError(
+                "One or more sources attempted to "
+                "be placed outside the landscape."
+                )
+
+        self._point_sources = sources
+
+    def _fit_landscape_to_path(self) -> None:
+        """The size of the landscape will be updated if
+        1) _size is not set, or
+        2) _size is too small to contain the path."""
+
         needs_resize = (
             not self._size
             or any(p > s for p, s in zip(self._path.size, self._size))
@@ -104,31 +160,8 @@ class LandscapeBuilder:
                     "Landscape size will be expanded to accommodate path."
                 )
 
-            self.set_landscape_size(self._path.size)
-
-        return self
-
-    def set_point_sources(self, *sources):
-        """Add one or more point sources to the world.
-
-        Args:
-            *sources (pg_rad.sources.PointSource): One or more sources,
-            passed as Source1, Source2, ...
-        Raises:
-            OutOfBoundsError: If any source is outside the boundaries of the
-            landscape.
-        """
-
-        if any(
-            any(p < 0 or p >= s for p, s in zip(source.pos, self._size))
-            for source in sources
-        ):
-            raise OutOfBoundsError(
-                "One or more sources attempted to "
-                "be placed outside the landscape."
-                )
-
-        self._point_sources = sources
+            max_size = max(self._path.size)
+            self.set_landscape_size((max_size, max_size))
 
     def build(self):
         landscape = Landscape(
