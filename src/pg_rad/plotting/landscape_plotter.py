@@ -54,7 +54,14 @@ class LandscapeSlicePlotter:
 
     def _draw_path(self, ax, landscape):
         if landscape.path.z <= self.z:
-            ax.plot(landscape.path.x_list, landscape.path.y_list, 'bo-')
+            ax.plot(
+                landscape.path.x_list,
+                landscape.path.y_list,
+                linestyle='-',
+                marker='|',
+                markersize=3,
+                linewidth=1
+            )
         else:
             logger.warning(
                 "Path is above the slice height z."
