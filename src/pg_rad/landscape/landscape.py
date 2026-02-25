@@ -1,12 +1,7 @@
 import logging
-from typing import List, Self
 
-from pg_rad.dataloader.dataloader import load_data
-from pg_rad.exceptions.exceptions import OutOfBoundsError
+from pg_rad.path.path import Path
 from pg_rad.objects.sources import PointSource
-from pg_rad.path.path import Path, path_from_RT90
-
-from road_gen.generators.segmented_road_generator import SegmentedRoadGenerator
 
 
 logger = logging.getLogger(__name__)
@@ -20,22 +15,18 @@ class Landscape:
             self,
             name: str,
             path: Path,
-            point_sources: list[PointSource] = [],
-            size: tuple[int, int, int] = [500, 500, 50],
-            air_density: float = 1.243
+            air_density: float,
+            point_sources: list[PointSource],
+            size: tuple[int, int, int]
             ):
         """Initialize a landscape.
 
         Args:
-            path (Path): A Path object.
-            point_sources (list[PointSource], optional): List of point sources.
-            air_density (float, optional): Air density in kg/m^3.
-                Defaults to 1.243.
-            size (tuple[int, int, int], optional): (x,y,z) dimensions of world
-                in meters. Defaults to [500, 500, 50].
-
-        Raises:
-            TypeError: _description_
+            name (str): Name of the landscape.
+            path (Path): The path of the detector.
+            air_density (float): Air density in kg/m^3.
+            point_sources (list[PointSource]): List of point sources.
+            size (tuple[int, int, int]): Size of the world.
         """
 
         self.name = name
@@ -45,132 +36,3 @@ class Landscape:
         self.air_density = air_density
 
         logger.debug(f"Landscape created: {self.name}")
-
-
-class LandscapeBuilder:
-    def __init__(self, name: str = "Unnamed landscape"):
-        self.name = name
-        self._path = None
-        self._point_sources = []
-        self._size = None
-        self._air_density = None
-
-        logger.debug(f"LandscapeBuilder initialized: {self.name}")
-
-    def set_air_density(self, air_density) -> Self:
-        """Set the air density of the world."""
-        self._air_density = air_density
-        return self
-
-    def set_landscape_size(self, size: tuple[int, int, int]) -> Self:
-        """Set the size of the landscape in meters (x,y,z)."""
-        if self._path and any(p > s for p, s in zip(self._path.size, size)):
-            raise OutOfBoundsError(
-                "Cannot set landscape size smaller than the path."
-            )
-
-        self._size = size
-        logger.debug("Size of the landscape has been updated.")
-
-        return self
-
-    def get_path(self):
-        return self._path
-
-    def set_path_from_segments(
-        self,
-        length: int | float,
-        speed: int | float,
-        acquisition_time: int,
-        segments: List,
-        angles: List,
-        alpha: int | float = None
-    ):
-        sg = SegmentedRoadGenerator(
-            length=length,
-            ds=speed*acquisition_time,
-            velocity=speed
-        )
-
-        x, y = sg.generate(
-            segments=segments
-        )
-
-        self._path = Path(list(zip(x, y)))
-        self._fit_landscape_to_path()
-        return self
-
-    def set_path_from_experimental_data(
-        self,
-        file: str,
-        z: int,
-        east_col_name: str = "East",
-        north_col_name: str = "North"
-    ) -> Self:
-        df = load_data(file)
-        self._path = path_from_RT90(
-            df=df,
-            east_col=east_col_name,
-            north_col=north_col_name,
-            z=z
-        )
-
-        self._fit_landscape_to_path()
-
-        return self
-
-    def set_point_sources(self, *sources):
-        """Add one or more point sources to the world.
-
-        Args:
-            *sources (pg_rad.sources.PointSource): One or more sources,
-            passed as Source1, Source2, ...
-        Raises:
-            OutOfBoundsError: If any source is outside the boundaries of the
-            landscape.
-        """
-        if any(
-            any(p < 0 or p >= s for p, s in zip(source.pos, self._size))
-            for source in sources
-        ):
-            raise OutOfBoundsError(
-                "One or more sources attempted to "
-                "be placed outside the landscape."
-                )
-
-        self._point_sources = sources
-
-    def _fit_landscape_to_path(self) -> None:
-        """The size of the landscape will be updated if
-        1) _size is not set, or
-        2) _size is too small to contain the path."""
-
-        needs_resize = (
-            not self._size
-            or any(p > s for p, s in zip(self._path.size, self._size))
-        )
-
-        if needs_resize:
-            if not self._size:
-                logger.debug("Because no Landscape size was set, "
-                             "it will now set to path dimensions.")
-            else:
-                logger.warning(
-                    "Path exceeds current landscape size. "
-                    "Landscape size will be expanded to accommodate path."
-                )
-
-            max_size = max(self._path.size)
-            self.set_landscape_size((max_size, max_size))
-
-    def build(self):
-        landscape = Landscape(
-            name=self.name,
-            path=self._path,
-            point_sources=self._point_sources,
-            size=self._size,
-            air_density=self._air_density
-        )
-
-        logger.info(f"Landscape built successfully: {landscape.name}")
-        return landscape
