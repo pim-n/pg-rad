@@ -2,6 +2,8 @@ from typing import Self
 
 import numpy as np
 
+from pg_rad.exceptions.exceptions import DimensionError
+
 
 class BaseObject:
     def __init__(
@@ -21,7 +23,7 @@ class BaseObject:
         """
 
         if len(pos) != 3:
-            raise ValueError("Position must be tuple of length 3 (x,y,z).")
+            raise DimensionError("Position must be tuple of length 3 (x,y,z).")
         self.pos = pos
         self.name = name
         self.color = color

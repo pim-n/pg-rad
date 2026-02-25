@@ -1,5 +1,6 @@
 from typing import Dict, Type
 
+from pg_rad.exceptions.exceptions import InvalidIsotopeError
 from pg_rad.physics.attenuation import get_mass_attenuation_coeff
 
 
@@ -46,5 +47,5 @@ preset_isotopes: Dict[str, Type[Isotope]] = {
 def get_isotope(isotope_str: str) -> Isotope:
     """Lazy factory function to create isotope objects."""
     if isotope_str not in preset_isotopes:
-        raise ValueError(f"Unknown isotope: {isotope_str}")
+        raise InvalidIsotopeError(f"Unknown isotope: {isotope_str}")
     return preset_isotopes[isotope_str]()
