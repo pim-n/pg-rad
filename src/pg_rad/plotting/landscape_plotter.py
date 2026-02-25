@@ -1,7 +1,10 @@
 import logging
 
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 from matplotlib.patches import Circle
+
+from numpy import median
 
 from pg_rad.landscape.landscape import Landscape
 
@@ -14,7 +17,8 @@ class LandscapeSlicePlotter:
         landscape: Landscape,
         z: int = 0,
         show: bool = True,
-        save: bool = False
+        save: bool = False,
+        ax: Axes | None = None
     ):
         """Plot a top-down slice of the landscape at a height z.
 
@@ -27,7 +31,9 @@ class LandscapeSlicePlotter:
 
         """
         self.z = z
-        fig, ax = plt.subplots()
+
+        if not ax:
+            fig, ax = plt.subplots()
 
         self._draw_base(ax, landscape)
         self._draw_path(ax, landscape)
@@ -35,19 +41,30 @@ class LandscapeSlicePlotter:
 
         ax.set_aspect("equal")
 
-        if save:
+        if save and not ax:
             landscape_name = landscape.name.lower().replace(' ', '_')
             filename = f"{landscape_name}_z{self.z}.png"
             plt.savefig(filename)
             logger.info("Plot saved to file: "+filename)
 
-        if show:
+        if show and not ax:
             plt.show()
 
-    def _draw_base(self, ax, landscape):
+        return ax
+
+    def _draw_base(self, ax, landscape: Landscape):
         width, height = landscape.size[:2]
-        ax.set_xlim(right=width)
-        ax.set_ylim(top=height)
+
+        ax.set_xlim(right=max(width, .5*height))
+
+        # if the road is very flat, we center it vertically (looks better)
+        if median(landscape.path.y_list) == 0:
+            h = max(height, .5*width)
+            ax.set_ylim(bottom=-h//2,
+                        top=h//2)
+        else:
+            ax.set_ylim(top=max(height, .5*width))
+
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
         ax.set_title(f"Landscape (top-down, z = {self.z})")
