@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 import numpy as np
@@ -6,11 +7,16 @@ from .base_road_generator import BaseRoadGenerator
 from road_gen.prefabs import prefabs
 from road_gen.integrator.integrator import integrate_road
 
+from pg_rad.configs import defaults
+
+
+logger = logging.getLogger(__name__)
+
 
 class SegmentedRoadGenerator(BaseRoadGenerator):
     def __init__(
         self,
-        length: int | float,
+        length: int | float | list[int | float],
         ds: int | float,
         velocity: int | float,
         mu: float = 0.7,
@@ -29,14 +35,20 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
                 Defaults to random seed.
         """
 
+        if isinstance(length, list):
+            length = sum(
+                [seg_len for seg_len in length if seg_len is not None]
+            )
         super().__init__(length, ds, velocity, mu, g, seed)
 
     def generate(
             self,
             segments: list[str],
-            alpha: float = 100,
-            min_turn_angle: float = 15.,
-            max_turn_angle: float = 90.
+            lengths: list[int | float] | None = None,
+            angles: list[int | float] | None = None,
+            alpha: float = defaults.DEFAULT_ALPHA,
+            min_turn_angle: float = defaults.DEFAULT_MIN_TURN_ANGLE,
+            max_turn_angle: float = defaults.DEFAULT_MAX_TURN_ANGLE
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Generate a curvature profile from a list of segments.
 
@@ -76,16 +88,21 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
 
         self.segments = segments
         self.alpha = alpha
-        num_points = int(self.length / self.ds)
+        num_points = np.ceil(self.length / self.ds).astype(int)
 
         # divide num_points into len(segments) randomly sized parts.
-        parts = self._rng.dirichlet(np.full(len(segments), alpha), size=1)[0]
-        parts = parts * num_points
-        parts = np.round(parts).astype(int)
+        if isinstance(self.length, list):
+            parts = self.length
+        else:
+            parts = self._rng.dirichlet(
+                np.full(len(segments), alpha),
+                size=1)[0]
+            parts = parts * num_points
+            parts = np.round(parts).astype(int)
 
-        # correct round off so the sum of parts is still total length L.
-        if sum(parts) != num_points:
-            parts[0] += num_points - sum(parts)
+            # correct round off so the sum of parts is still total length L.
+            if sum(parts) != num_points:
+                parts[0] += num_points - sum(parts)
 
         curvature = np.zeros(num_points)
         current_index = 0
@@ -103,7 +120,13 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
                 R_min = max(self.min_radius, R_min_angle)
 
                 if R_min > R_max_angle:
-                    raise ValueError("No valid radius for this turn segment")
+                    raise ValueError(
+                        f"{seg_name} with length {seg_length} does not have "
+                        "a possible radius. The minimum for the provided "
+                        "velocity and friction coefficient is "
+                        f"{self.min_radius}, but the possible range is "
+                        f"({R_min}, {R_max_angle})"
+                    )
 
                 rand_radius = self._rng.uniform(R_min, R_max_angle)
 
