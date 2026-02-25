@@ -42,7 +42,7 @@ def phi(
     return phi_r
 
 
-def calculate_fluence_at(landscape: "Landscape", pos: np.ndarray):
+def calculate_fluence_at(landscape: "Landscape", pos: np.ndarray, scaling=1E6):
     """Compute fluence at an arbitrary position in the landscape.
 
     Args:
@@ -52,15 +52,16 @@ def calculate_fluence_at(landscape: "Landscape", pos: np.ndarray):
     Returns:
         total_phi (np.ndarray): (N,) array of fluences.
     """
+    pos = np.atleast_2d(pos)
     total_phi = np.zeros(pos.shape[0])
 
     for source in landscape.point_sources:
         r = np.linalg.norm(pos - np.array(source.pos), axis=1)
-        r = np.maximum(r, 1e-3)  # enforce minimum distance of 1cm
+        r = np.maximum(r, 1E-3)  # enforce minimum distance of 1cm
 
         phi_source = phi(
             r=r,
-            activity=source.activity,
+            activity=source.activity * scaling,
             branching_ratio=source.isotope.b,
             mu_mass_air=source.isotope.mu_mass_air,
             air_density=landscape.air_density

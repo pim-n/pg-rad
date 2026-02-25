@@ -1,34 +1,53 @@
-from math import dist, exp, pi
-
+import numpy as np
 import pytest
 
-from pg_rad.landscape import LandscapeDirector
+from pg_rad.inputparser.parser import ConfigParser
+from pg_rad.landscape.director import LandscapeDirector
+from pg_rad.physics import calculate_fluence_at
 
 
 @pytest.fixture
-def phi_ref():
-    A = 100                             # MBq
-    b = 0.851
-    mu_mass_air = 0.0778                # cm^2/g
-    air_density = 1.243                 # kg/m^3
-    r = dist((0, 0, 0), (10, 10, 0))    # m
+def phi_ref(test_landscape):
+    source = test_landscape.point_sources[0]
 
-    A *= 1E9                            # Convert to Bq
-    mu_mass_air *= 0.1                  # Convert to m^2/kg
+    r = np.linalg.norm(np.array([10, 10, 0]) - np.array(source.pos))
 
-    mu_air = mu_mass_air * air_density  # [m^2/kg] x [kg/m^3] = [m^-1]
+    A = source.activity * 1E6
+    b = source.isotope.b
+    mu_air = source.isotope.mu_mass_air * test_landscape.air_density
+    mu_air *= 0.1
 
-    # [s^-1] x exp([m^-1] x [m]) / [m^-2] = [s^-1 m^-2]
-    phi = A * b * exp(-mu_air * r) / (4 * pi * r**2)
-    return phi
+    return A * b * np.exp(-mu_air * r) / (4 * np.pi * r**2)
 
 
 @pytest.fixture
 def test_landscape():
-    landscape = LandscapeDirector().build_test_landscape()
+
+    test_yaml = """
+    name: Test landscape
+    speed: 8.33
+    acquisition_time: 1
+
+    path:
+        length: 1000
+        segments:
+            - straight
+
+    sources:
+        test_source:
+            activity_MBq: 100
+            position: [0, 0, 0]
+            isotope: CS137
+    """
+
+    cp = ConfigParser(test_yaml).parse()
+    landscape = LandscapeDirector.build_from_config(cp)
     return landscape
 
 
 def test_single_source_fluence(phi_ref, test_landscape):
-    phi = test_landscape.calculate_fluence_at((10, 10, 0))
-    assert pytest.approx(phi, rel=1E-3) == phi_ref
+    phi = calculate_fluence_at(
+        test_landscape,
+        np.array([10, 10, 0]),
+        )
+    assert pytest.approx(phi[0], rel=1E-3) == phi_ref
