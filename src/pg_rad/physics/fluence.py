@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING
 
 import numpy as np
 
@@ -42,10 +42,22 @@ def phi(
     return phi_r
 
 
-def calculate_fluence_at(landscape: "Landscape", pos: tuple):
-    total_phi = 0.
+def calculate_fluence_at(landscape: "Landscape", pos: np.ndarray):
+    """Compute fluence at an arbitrary position in the landscape.
+
+    Args:
+        landscape (Landscape): The landscape to compute.
+        pos (np.ndarray): (N, 3) array of positions.
+
+    Returns:
+        total_phi (np.ndarray): (N,) array of fluences.
+    """
+    total_phi = np.zeros(pos.shape[0])
+
     for source in landscape.point_sources:
-        r = source.distance_to(pos)
+        r = np.linalg.norm(pos - np.array(source.pos), axis=1)
+        r = np.maximum(r, 1e-3)  # enforce minimum distance of 1cm
+
         phi_source = phi(
             r=r,
             activity=source.activity,
@@ -53,30 +65,34 @@ def calculate_fluence_at(landscape: "Landscape", pos: tuple):
             mu_mass_air=source.isotope.mu_mass_air,
             air_density=landscape.air_density
         )
+
         total_phi += phi_source
+
     return total_phi
 
 
 def calculate_fluence_along_path(
     landscape: "Landscape",
     points_per_segment: int = 10
-):
-    
-    phi_result = []
- 
+) -> Tuple[np.ndarray, np.ndarray]:
     path = landscape.path
-    waypoints = list(zip(path.x_list, path.y_list))
+    num_segments = len(path.segments)
 
-    for w, wp1 in zip(waypoints, waypoints[1:]):
-        x_ref, y_ref = zip(w, wp1)
- 
-        x = np.linspace(x_ref[0], x_ref[1], points_per_segment)
-        y = np.interp(x, x_ref, y_ref)
-        z = np.full(x.shape, fill_value=path.z)
-        
-        for pos in zip(x, y, z):
-            phi_segment = calculate_fluence_at(landscape, pos)
-            phi_result.append(phi_segment)
-    
-    return phi_result
-    
+    xnew = np.linspace(
+        path.x_list[0],
+        path.x_list[-1],
+        num=num_segments*points_per_segment)
+
+    ynew = np.interp(xnew, path.x_list, path.y_list)
+
+    z = np.full(xnew.shape, path.z)
+    full_positions = np.c_[xnew, ynew, z]
+    phi_result = calculate_fluence_at(landscape, full_positions)
+
+    dist_travelled = np.linspace(
+        full_positions[0, 0],
+        path.length,
+        len(phi_result)
+    )
+
+    return dist_travelled, phi_result
