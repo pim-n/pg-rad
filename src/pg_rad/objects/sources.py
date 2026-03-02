@@ -1,7 +1,7 @@
 import logging
 
 from .objects import BaseObject
-from pg_rad.isotopes import Isotope
+from pg_rad.isotopes.isotope import Isotope, get_isotope
 
 logger = logging.getLogger(__name__)
 
@@ -11,16 +11,16 @@ class PointSource(BaseObject):
 
     def __init__(
             self,
-            activity: int,
-            isotope: Isotope,
-            pos: tuple[float, float, float] = (0, 0, 0),
+            activity_MBq: int,
+            isotope: str,
+            position: tuple[float, float, float] = (0, 0, 0),
             name: str | None = None,
             color: str = 'red'
             ):
         """A point source.
 
         Args:
-            activity (int): Activity A in MBq.
+            activity_MBq (int): Activity A in MBq.
             isotope (Isotope): The isotope.
             pos (tuple[float, float, float], optional):
                 Position of the PointSource.
@@ -37,16 +37,17 @@ class PointSource(BaseObject):
         if name is None:
             name = f"Source {self.id}"
 
-        super().__init__(pos, name, color)
+        super().__init__(position, name, color)
 
-        self.activity = activity
-        self.isotope = isotope
+        self.activity = activity_MBq
+        self.isotope: Isotope = get_isotope(isotope)
 
         logger.debug(f"Source created: {self.name}")
 
     def __repr__(self):
+        x, y, z = self.position
         repr_str = (f"PointSource(name={self.name}, "
-                    + f"pos={(self.x, self.y, self.z)}, "
+                    + f"pos={(x, y, z)}, "
                     + f"A={self.activity} MBq), "
                     + f"isotope={self.isotope.name}.")
 
