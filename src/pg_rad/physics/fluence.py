@@ -77,23 +77,27 @@ def calculate_fluence_along_path(
     points_per_segment: int = 10
 ) -> Tuple[np.ndarray, np.ndarray]:
     path = landscape.path
-    num_segments = len(path.segments)
+    num_points = len(path.x_list)
 
-    xnew = np.linspace(
-        path.x_list[0],
-        path.x_list[-1],
-        num=num_segments*points_per_segment)
+    dx = np.diff(path.x_list)
+    dy = np.diff(path.y_list)
+    segment_lengths = np.sqrt(dx**2 + dy**2)
 
-    ynew = np.interp(xnew, path.x_list, path.y_list)
+    original_distances = np.zeros(num_points)
+    original_distances[1:] = np.cumsum(segment_lengths)
 
+    # arc lengths at which to evaluate the path
+    s = np.linspace(
+        0,
+        original_distances[-1],
+        num=num_points * points_per_segment)
+
+    # Interpolate x and y as functions of arc length
+    xnew = np.interp(s, original_distances, path.x_list)
+    ynew = np.interp(s, original_distances, path.y_list)
     z = np.full(xnew.shape, path.z)
     full_positions = np.c_[xnew, ynew, z]
+
     phi_result = calculate_fluence_at(landscape, full_positions)
 
-    dist_travelled = np.linspace(
-        full_positions[0, 0],
-        path.length,
-        len(phi_result)
-    )
-
-    return dist_travelled, phi_result
+    return s, phi_result
