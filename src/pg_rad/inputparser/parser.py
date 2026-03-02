@@ -109,7 +109,10 @@ class ConfigParser:
             raise ValueError(
                 "options.air_density must be a positive float in kg/m^3."
             )
-        if not isinstance(seed, int) or seed < 0:
+        if (
+            seed is not None or
+            (isinstance(seed, int) and seed <= 0)
+        ):
             raise ValueError("Seed must be a positive integer value.")
 
         return SimulationOptionsSpec(
