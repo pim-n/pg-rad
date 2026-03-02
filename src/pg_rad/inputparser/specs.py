@@ -15,15 +15,8 @@ class RuntimeSpec:
 
 @dataclass
 class SimulationOptionsSpec:
-    air_density: float = 1.243
+    air_density: float
     seed: int | None = None
-
-
-@dataclass
-class SegmentSpec:
-    type: str
-    length: float
-    angle: float | None
 
 
 @dataclass
@@ -33,8 +26,11 @@ class PathSpec(ABC):
 
 @dataclass
 class ProceduralPathSpec(PathSpec):
-    segments: list[SegmentSpec]
+    segments: list[str]
+    angles: list[float]
+    lengths: list[int | None]
     z: int | float
+    alpha: float
 
 
 @dataclass

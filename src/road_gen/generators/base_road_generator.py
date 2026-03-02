@@ -7,7 +7,6 @@ class BaseRoadGenerator:
     """A base generator object for generating a road of a specified length."""
     def __init__(
             self,
-            length: int | float,
             ds: int | float,
             velocity: int | float,
             mu: float = 0.7,
@@ -17,7 +16,6 @@ class BaseRoadGenerator:
         """Initialize a BaseGenerator with a given or random seed.
 
         Args:
-            length (int | float): The total length of the road in meters.
             ds (int | float): The step size in meters.
             velocity (int | float): Velocity in meters per second.
             mu (float): Coefficient of friction. Defaults to 0.7 (dry asphalt).
@@ -31,9 +29,6 @@ class BaseRoadGenerator:
         if not isinstance(seed, int):
             raise TypeError("seed must be an integer or None.")
 
-        if not isinstance(length, int | float):
-            raise TypeError("Length must be an integer or float in meters.")
-
         if not isinstance(ds, int | float):
             raise TypeError("Step size must be integer or float in meters.")
 
@@ -42,7 +37,6 @@ class BaseRoadGenerator:
                 "Velocity must be integer or float in meters per second."
             )
 
-        self.length = length
         self.ds = ds
 
         self.velocity = velocity

@@ -56,23 +56,24 @@ class LandscapeBuilder:
         self,
         sim_spec: SimulationSpec
     ):
-
         segments = sim_spec.path.segments
-        types = [s.type for s in segments]
-        lengths = [s.length for s in segments]
-        angles = [s.angle for s in segments]
+        lengths = sim_spec.path.lengths
+        angles = sim_spec.path.angles
+        alpha = sim_spec.path.alpha
+
+        print(segments, lengths, angles)
 
         sg = SegmentedRoadGenerator(
-            length=lengths,
             ds=sim_spec.runtime.speed * sim_spec.runtime.acquisition_time,
             velocity=sim_spec.runtime.speed,
             seed=sim_spec.options.seed
         )
 
         x, y = sg.generate(
-            segments=types,
+            segments=segments,
             lengths=lengths,
-            angles=angles
+            angles=angles,
+            alpha=alpha
         )
 
         self._path = Path(list(zip(x, y)))

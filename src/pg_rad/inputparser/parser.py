@@ -11,7 +11,6 @@ from .specs import (
     MetadataSpec,
     RuntimeSpec,
     SimulationOptionsSpec,
-    SegmentSpec,
     PathSpec,
     ProceduralPathSpec,
     CSVPathSpec,
@@ -122,7 +121,7 @@ class ConfigParser:
 
     def _parse_path(self) -> PathSpec:
         allowed_csv = {"file", "east_col_name", "north_col_name", "z"}
-        allowed_proc = {"segments", "length", "z"}
+        allowed_proc = {"segments", "length", "z", "alpha"}
 
         path = self.config.get("path")
         if path is None:
@@ -172,13 +171,15 @@ class ConfigParser:
         if isinstance(raw_length, int | float):
             raw_length = [float(raw_length)]
 
-        segments = self._process_segment_angles(raw_segments)
+        segments, angles = self._process_segment_angles(raw_segments)
         lengths = self._process_segment_lengths(raw_length, len(segments))
-        resolved_segments = self._combine_segments_lengths(segments, lengths)
 
         return ProceduralPathSpec(
-            segments=resolved_segments,
+            segments=segments,
+            angles=angles,
+            lengths=lengths,
             z=path.get("z", defaults.DEFAULT_PATH_HEIGHT),
+            alpha=path.get("alpha", defaults.DEFAULT_ALPHA)
         )
 
     def _process_segment_angles(
@@ -186,23 +187,25 @@ class ConfigParser:
         raw_segments: List[Union[str, dict]]
     ) -> List[Dict[str, Any]]:
 
-        normalized = []
+        segments, angles = [], []
 
         for segment in raw_segments:
 
             if isinstance(segment, str):
-                normalized.append({"type": segment, "angle": None})
+                segments.append(segment)
+                angles.append(None)
 
             elif isinstance(segment, dict):
                 if len(segment) != 1:
                     raise ValueError("Invalid segment definition.")
                 seg_type, angle = list(segment.items())[0]
-                normalized.append({"type": seg_type, "angle": angle})
+                segments.append(seg_type)
+                angles.append(angle)
 
             else:
                 raise ValueError("Invalid segment entry format.")
 
-        return normalized
+        return segments, angles
 
     def _process_segment_lengths(
         self,
@@ -218,32 +221,6 @@ class ConfigParser:
                 "Path length must either be a single number or a list with "
                 "number of elements equal to the number of segments."
             )
-
-    def _combine_segments_lengths(
-        self,
-        segments: List[Dict[str, Any]],
-        lengths: List[float],
-    ) -> List[SegmentSpec]:
-
-        resolved = []
-
-        for seg, length in zip(segments, lengths):
-            angle = seg["angle"]
-
-            if angle is not None and not self._is_turn(seg["type"]):
-                raise ValueError(
-                    f"A {seg['type']} segment does not support an angle."
-                )
-
-            resolved.append(
-                SegmentSpec(
-                    type=seg["type"],
-                    length=length,
-                    angle=angle,
-                )
-            )
-
-        return resolved
 
     @staticmethod
     def _is_turn(segment_type: str) -> bool:
