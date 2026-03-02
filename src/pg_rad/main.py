@@ -104,7 +104,8 @@ def main():
         except (
             OutOfBoundsError,
             DimensionError,
-            InvalidIsotopeError
+            InvalidIsotopeError,
+            ValueError
         ) as e:
             logger.critical(e)
             logger.critical(

@@ -61,7 +61,7 @@ def minimal_distance_to_path(
     to interpolated polyline path at height path_z.
     """
     x, y, z = pos
-    
+
     path = np.column_stack((x_list, y_list))
     point_xy = np.array([x, y])
 
@@ -103,7 +103,7 @@ def abs_to_rel_source_position(
         side ("left" or "right"),
         z_rel
     """
-    
+
     x, y, z = pos
 
     path = np.column_stack((x_list, y_list))
@@ -121,7 +121,9 @@ def abs_to_rel_source_position(
     best_fraction = None
     best_signed_dist = None
 
-    for i, (p0, seg, seg_len) in enumerate(zip(path[:-1], segments, segment_lengths)):
+    for (i, (p0, seg, seg_len)) in enumerate(
+        zip(path[:-1], segments, segment_lengths)
+    ):
         if seg_len == 0:
             continue
 
@@ -152,7 +154,9 @@ def abs_to_rel_source_position(
         raise ValueError("Could not project point onto path.")
 
     # Compute along_path
-    along_path = arc_length[best_s_i] + best_fraction * segment_lengths[best_s_i]
+    along_path = (
+        arc_length[best_s_i] + best_fraction * segment_lengths[best_s_i]
+    )
 
     # Side and distance
     side = "left" if best_signed_dist > 0 else "right"
