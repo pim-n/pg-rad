@@ -5,10 +5,10 @@ class BaseDetector(ABC):
     def __init__(
         self,
         name: str,
-        eff: float
+        efficiency: float
     ):
         self.name = name
-        self.eff = eff
+        self.efficiency = efficiency
 
     def get_efficiency(self):
         pass
@@ -18,21 +18,21 @@ class IsotropicDetector(BaseDetector):
     def __init__(
         self,
         name: str,
-        eff: float | None = None
+        efficiency: float,
     ):
-        super().__init__(name, eff)
+        super().__init__(name, efficiency)
 
     def get_efficiency(self, energy):
-        return self.eff
+        return self.efficiency
 
 
 class AngularDetector(BaseDetector):
     def __init__(
         self,
         name: str,
-        eff: float | None = None
+        efficiency: float
     ):
-        super().__init__(name, eff)
+        super().__init__(name, efficiency)
 
     def get_efficiency(self, angle, energy):
         pass

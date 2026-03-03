@@ -14,7 +14,7 @@ class DetectorBuilder:
         if self.detector_spec.is_isotropic:
             return IsotropicDetector(
                 self.detector_spec.name,
-                self.detector_spec.eff
+                self.detector_spec.efficiency
             )
         else:
             raise NotImplementedError("Angular detector not supported yet.")
