@@ -16,3 +16,10 @@ DEFAULT_MAX_TURN_ANGLE = 90.
 DEFAULT_FRICTION_COEFF = 0.7      # dry asphalt
 DEFAULT_GRAVITATIONAL_ACC = 9.81  # m/s^2
 DEFAULT_ALPHA = 100.
+
+# --- Detector efficiencies ---
+DETECTOR_EFFICIENCIES = {
+    "dummy": 1.0,
+    "NaIR": 0.0216,
+    "NaIF": 0.0254
+}

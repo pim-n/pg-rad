@@ -17,7 +17,8 @@ from .specs import (
     SourceSpec,
     AbsolutePointSourceSpec,
     RelativePointSourceSpec,
-    SimulationSpec,
+    DetectorSpec,
+    SimulationSpec
 )
 
 
@@ -31,7 +32,8 @@ class ConfigParser:
         "acquisition_time",
         "path",
         "sources",
-        "options",
+        "detector",
+        "options"
     }
 
     def __init__(self, config_source: str):
@@ -49,6 +51,7 @@ class ConfigParser:
         options = self._parse_options()
         path = self._parse_path()
         sources = self._parse_point_sources()
+        detector = self._parse_detector()
 
         return SimulationSpec(
             metadata=metadata,
@@ -56,6 +59,7 @@ class ConfigParser:
             options=options,
             path=path,
             point_sources=sources,
+            detector=detector
         )
 
     def _load_yaml(self, config_source: str) -> Dict[str, Any]:
@@ -284,6 +288,34 @@ class ConfigParser:
                     )
 
         return specs
+
+    def _parse_detector(self) -> DetectorSpec:
+        det_dict = self.config.get("detector", {})
+        required = {"name", "is_isotropic"}
+
+        missing = required - det_dict.keys()
+        if missing:
+            raise MissingConfigKeyError(missing)
+
+        name = det_dict.get("name")
+        is_isotropic = det_dict.get("is_isotropic")
+        eff = det_dict.get("efficiency")
+
+        default_detectors = defaults.DETECTOR_EFFICIENCIES
+
+        if eff is None and name in default_detectors.keys():
+            eff = default_detectors[name]
+        elif eff is not None:
+            pass
+        else:
+            raise ValueError(
+                f"The detector {name} is not in the library, and no "
+                "efficiency was defined. Either specify detector efficiency "
+                "or choose one from the following list: "
+                f"{default_detectors.keys()}"
+            )
+
+        return DetectorSpec(name=name, eff=eff, is_isotropic=is_isotropic)
 
     def _warn_unknown_keys(self, section: str, provided: set, allowed: set):
         unknown = provided - allowed

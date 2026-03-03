@@ -5,6 +5,7 @@ import sys
 from pandas.errors import ParserError
 from yaml import YAMLError
 
+from pg_rad.detector.builder import DetectorBuilder
 from pg_rad.exceptions.exceptions import (
     MissingConfigKeyError,
     OutOfBoundsError,
@@ -81,9 +82,10 @@ def main():
         try:
             cp = ConfigParser(args.config).parse()
             landscape = LandscapeDirector.build_from_config(cp)
-
+            detector = DetectorBuilder(cp.detector).build()
             output = SimulationEngine(
                 landscape=landscape,
+                detector=detector,
                 runtime_spec=cp.runtime,
                 sim_spec=cp.options
             ).simulate()

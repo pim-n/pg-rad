@@ -64,9 +64,17 @@ class RelativePointSourceSpec(SourceSpec):
 
 
 @dataclass
+class DetectorSpec:
+    name: str
+    eff: float | None
+    is_isotropic: bool
+
+
+@dataclass
 class SimulationSpec:
     metadata: MetadataSpec
     runtime: RuntimeSpec
     options: SimulationOptionsSpec
     path: PathSpec
     point_sources: list[SourceSpec]
+    detector: DetectorSpec
