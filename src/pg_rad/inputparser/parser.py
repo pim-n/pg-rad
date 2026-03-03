@@ -4,7 +4,11 @@ from typing import Any, Dict, List, Union
 
 import yaml
 
-from pg_rad.exceptions.exceptions import MissingConfigKeyError, DimensionError
+from pg_rad.exceptions.exceptions import (
+    MissingConfigKeyError,
+    DimensionError,
+    InvalidConfigValueError
+)
 from pg_rad.configs import defaults
 
 from .specs import (
@@ -14,7 +18,7 @@ from .specs import (
     PathSpec,
     ProceduralPathSpec,
     CSVPathSpec,
-    SourceSpec,
+    PointSourceSpec,
     AbsolutePointSourceSpec,
     RelativePointSourceSpec,
     DetectorSpec,
@@ -98,19 +102,23 @@ class ConfigParser:
     def _parse_options(self) -> SimulationOptionsSpec:
         options = self.config.get("options", {})
 
-        allowed = {"air_density", "seed"}
+        allowed = {"air_density_kg_per_m3", "seed"}
         self._warn_unknown_keys(
             section="options",
             provided=set(options.keys()),
             allowed=allowed,
         )
 
-        air_density = options.get("air_density", defaults.DEFAULT_AIR_DENSITY)
+        air_density = options.get(
+            "air_density_kg_per_m3",
+            defaults.DEFAULT_AIR_DENSITY
+        )
         seed = options.get("seed")
 
         if not isinstance(air_density, float) or air_density <= 0:
             raise ValueError(
-                "options.air_density must be a positive float in kg/m^3."
+                "options.air_density_kg_per_m3 must be a positive float "
+                "in kg/m^3."
             )
         if (
             seed is not None or
@@ -230,9 +238,9 @@ class ConfigParser:
     def _is_turn(segment_type: str) -> bool:
         return segment_type in {"turn_left", "turn_right"}
 
-    def _parse_point_sources(self) -> List[SourceSpec]:
+    def _parse_point_sources(self) -> List[PointSourceSpec]:
         source_dict = self.config.get("sources", {})
-        specs: List[SourceSpec] = []
+        specs: List[PointSourceSpec] = []
 
         for name, params in source_dict.items():
 
@@ -245,7 +253,7 @@ class ConfigParser:
             isotope = params.get("isotope")
 
             if not isinstance(activity, int | float) or activity <= 0:
-                raise ValueError(
+                raise InvalidConfigValueError(
                     f"sources.{name}.activity_MBq must be positive value "
                     "in MegaBequerels."
                 )
@@ -270,6 +278,16 @@ class ConfigParser:
                 )
 
             elif isinstance(position, dict):
+                alignment = position.get("acquisition_alignment")
+                if alignment not in {'best', 'worst', None}:
+                    raise InvalidConfigValueError(
+                        f"sources.{name}.acquisition_alignment must be "
+                        "'best' or 'worst', with 'best' aligning source "
+                        f"{name} in the middle of the two nearest acquisition "
+                        "points, and 'worst' aligning exactly perpendicular "
+                        "to the nearest acquisition point."
+                    )
+
                 specs.append(
                     RelativePointSourceSpec(
                         name=name,
@@ -278,12 +296,13 @@ class ConfigParser:
                         along_path=float(position["along_path"]),
                         dist_from_path=float(position["dist_from_path"]),
                         side=position["side"],
-                        z=position.get("z", defaults.DEFAULT_SOURCE_HEIGHT)
+                        z=position.get("z", defaults.DEFAULT_SOURCE_HEIGHT),
+                        alignment=alignment
                     )
                 )
 
             else:
-                raise ValueError(
+                raise InvalidConfigValueError(
                     f"Invalid position format for source '{name}'."
                     )
 
@@ -295,7 +314,7 @@ class ConfigParser:
 
         missing = required - det_dict.keys()
         if missing:
-            raise MissingConfigKeyError(missing)
+            raise MissingConfigKeyError("detector", missing)
 
         name = det_dict.get("name")
         is_isotropic = det_dict.get("is_isotropic")
@@ -303,19 +322,23 @@ class ConfigParser:
 
         default_detectors = defaults.DETECTOR_EFFICIENCIES
 
-        if eff is None and name in default_detectors.keys():
+        if name in default_detectors.keys() and not eff:
             eff = default_detectors[name]
-        elif eff is not None:
+        elif eff:
             pass
         else:
             raise ValueError(
-                f"The detector {name} is not in the library, and no "
-                "efficiency was defined. Either specify detector efficiency "
-                "or choose one from the following list: "
-                f"{default_detectors.keys()}"
+                f"The detector {name} not found in library. Either "
+                f"specify {name}.efficiency or "
+                "choose a detector from the following list: "
+                f"{default_detectors.keys()}."
             )
 
-        return DetectorSpec(name=name, eff=eff, is_isotropic=is_isotropic)
+        return DetectorSpec(
+            name=name,
+            efficiency=eff,
+            is_isotropic=is_isotropic
+        )
 
     def _warn_unknown_keys(self, section: str, provided: set, allowed: set):
         unknown = provided - allowed

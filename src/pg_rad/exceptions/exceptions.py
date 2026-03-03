@@ -31,3 +31,7 @@ class DimensionError(ValueError):
 
 class InvalidIsotopeError(ValueError):
     """Raised if attempting to load an isotope that is not valid."""
+
+
+class InvalidConfigValueError(ValueError):
+    """Raised if a config key has an incorrect type or value."""

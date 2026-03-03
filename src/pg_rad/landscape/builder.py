@@ -1,5 +1,7 @@
 import logging
-from typing import Self
+from typing import Literal, Self
+
+import numpy as np
 
 from .landscape import Landscape
 from pg_rad.dataloader.dataloader import load_data
@@ -113,11 +115,25 @@ class LandscapeBuilder:
                 pos = (s.x, s.y, s.z)
             elif isinstance(s, RelativePointSourceSpec):
                 path = self.get_path()
+
+                if s.alignment:
+                    along_path = self._align_relative_source(
+                        s.along_path,
+                        path,
+                        s.alignment
+                    )
+                    logger.info(
+                        f"Because source {s.name} was set to align with path "
+                        f"({s.alignment} alignment), it was moved to be at "
+                        f"{along_path} m along the path from {s.along_path} m."
+                    )
+                else:
+                    along_path = s.along_path
                 pos = rel_to_abs_source_position(
                     x_list=path.x_list,
                     y_list=path.y_list,
                     path_z=path.z,
-                    along_path=s.along_path,
+                    along_path=along_path,
                     side=s.side,
                     dist_from_path=s.dist_from_path)
             if any(
@@ -157,6 +173,48 @@ class LandscapeBuilder:
 
             max_size = max(self._path.size)
             self.set_landscape_size((max_size, max_size))
+
+    def _align_relative_source(
+        self,
+        along_path: float,
+        path: "Path",
+        mode: Literal["best", "worst"],
+    ) -> tuple[float, float, float]:
+        """Given the arc length at which the point source is placed,
+            align the source relative to the waypoints of the path. Here,
+            'best' means the point source is moved such that it is
+            perpendicular to the midpoint between two acuisition points.
+            'worst' means the point source is moved such that it is
+            perpendicular to the nearest acquisition point.
+
+            The distance to the path is not affected by this algorithm.
+
+            For more details on alignment, see
+            Fig. 4 and page 24 in Bukartas (2021).
+
+        Args:
+            along_path (float): Current arc length position of the source.
+            path (Path): The path to align to.
+            mode (Literal["best", "worst"]): Alignment mode.
+
+        Returns:
+            along_new (float): The updated arc length position.
+        """
+        ds = np.hypot(
+            path.x_list[1] - path.x_list[0],
+            path.y_list[1] - path.y_list[0],
+        )
+
+        if mode == "worst":
+            along_new = round(along_path / ds) * ds
+
+        elif mode == "best":
+            along_new = (round(along_path / ds - 0.5) + 0.5) * ds
+
+        else:
+            raise ValueError(f"Unknown alignment mode: {mode}")
+
+        return along_new
 
     def build(self):
         landscape = Landscape(

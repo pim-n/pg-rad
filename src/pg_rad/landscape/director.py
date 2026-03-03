@@ -22,7 +22,7 @@ class LandscapeDirector:
     def build_test_landscape():
         fp = files('pg_rad.data').joinpath(TEST_EXP_DATA)
         source = PointSource(
-            activity_MBq=100E9,
+            activity_MBq=100E6,
             isotope="CS137",
             position=(0, 0, 0)
         )
