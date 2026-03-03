@@ -40,7 +40,7 @@ class CS137(Isotope):
 
 
 preset_isotopes: Dict[str, Type[Isotope]] = {
-    "CS137": CS137
+    "Cs137": CS137
 }
 
 
