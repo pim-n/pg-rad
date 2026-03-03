@@ -30,6 +30,11 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.arithmatex:
       generic: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
 
 extra_javascript:
   - javascripts/mathjax.js
@@ -47,3 +52,12 @@ plugins:
         options:
           show_source: false
           show_root_heading: false
+
+nav:
+  - Home: index.md
+  - Installation Guide: installation.md
+  - Quickstart Guide: quickstart.md
+  - 'Tutorial: Writing a Config File': config-spec.md
+  - Explainers:
+    - explainers/planar_curve.ipynb
+    - explainers/prefab_roads.ipynb
