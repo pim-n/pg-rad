@@ -61,8 +61,6 @@ class LandscapeBuilder:
         angles = sim_spec.path.angles
         alpha = sim_spec.path.alpha
 
-        print(segments, lengths, angles)
-
         sg = SegmentedRoadGenerator(
             ds=sim_spec.runtime.speed * sim_spec.runtime.acquisition_time,
             velocity=sim_spec.runtime.speed,
