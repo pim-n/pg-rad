@@ -16,10 +16,10 @@ class ResultPlotter:
         fig = plt.figure(figsize=(12, 10), constrained_layout=True)
         fig.suptitle(self.landscape.name)
         gs = GridSpec(
-            3,
+            4,
             2,
             width_ratios=[0.5, 0.5],
-            height_ratios=[0.7, 0.15, 0.15],
+            height_ratios=[0.7, 0.1, 0.1, 0.1],
             hspace=0.2)
 
         ax1 = fig.add_subplot(gs[0, 0])
@@ -32,9 +32,11 @@ class ResultPlotter:
         self._draw_table(ax3)
 
         ax4 = fig.add_subplot(gs[2, :])
-        self._draw_source_table(ax4)
+        self._draw_detector_table(ax4)
 
-        plt.tight_layout()
+        ax5 = fig.add_subplot(gs[3, :])
+        self._draw_source_table(ax5)
+
         plt.show()
 
     def _plot_landscape(self, ax, z):
@@ -57,7 +59,26 @@ class ResultPlotter:
         cols = ('Parameter', 'Value')
         data = [
             ["Air density (kg/m^3)", round(self.landscape.air_density, 3)],
-            ["Total path length (m)", round(self.landscape.path.length, 3)]
+            ["Total path length (m)", round(self.landscape.path.length, 3)],
+        ]
+
+        ax.table(
+            cellText=data,
+            colLabels=cols,
+            loc='center'
+        )
+
+        return ax
+
+    def _draw_detector_table(self, ax):
+        det = self.landscape.detector
+        print(det)
+        ax.set_axis_off()
+        ax.set_title('Detector')
+        cols = ('Parameter', 'Value')
+        data = [
+            ["Name", det.name],
+            ["Type", det.efficiency],
         ]
 
         ax.table(
