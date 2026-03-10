@@ -3,7 +3,6 @@ import logging
 import sys
 
 from pandas.errors import ParserError
-from yaml import YAMLError
 
 from pg_rad.detector.builder import DetectorBuilder
 from pg_rad.exceptions.exceptions import (
@@ -11,7 +10,8 @@ from pg_rad.exceptions.exceptions import (
     OutOfBoundsError,
     DimensionError,
     InvalidConfigValueError,
-    InvalidIsotopeError
+    InvalidIsotopeError,
+    InvalidYAMLError
 )
 from pg_rad.logger.logger import setup_logger
 from pg_rad.inputparser.parser import ConfigParser
@@ -59,12 +59,14 @@ def main():
             length: 1000
             segments:
                 - straight
+                - turn_left
+            direction: negative
 
         sources:
             test_source:
-                activity_MBq: 1000
-                position: [500, 100, 0]
-                isotope: CS137
+                activity_MBq: 100
+                position: [250, 100, 0]
+                isotope: Cs137
 
         detector:
             name: dummy
@@ -100,8 +102,7 @@ def main():
             plotter.plot()
         except (
             MissingConfigKeyError,
-            KeyError,
-            YAMLError,
+            KeyError
         ) as e:
             logger.critical(e)
             logger.critical(
@@ -125,8 +126,10 @@ def main():
 
         except (
             FileNotFoundError,
-            ParserError
-        ):
+            ParserError,
+            InvalidYAMLError
+        ) as e:
+            logger.critical(e)
             sys.exit(1)
 
 
