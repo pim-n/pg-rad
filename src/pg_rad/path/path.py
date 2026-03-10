@@ -42,6 +42,7 @@ class Path:
     def __init__(
             self,
             coord_list: Sequence[tuple[float, float]],
+            opposite_direction: bool,
             z: float = 0.,
             z_box: float = 50.
                  ):
@@ -74,6 +75,8 @@ class Path:
             ]
 
         self.z = z
+        self.opposite_direction = opposite_direction
+
         self.size = (
             np.ceil(max(self.x_list)),
             np.ceil(max(self.y_list)),

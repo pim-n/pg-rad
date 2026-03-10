@@ -22,7 +22,8 @@ class SimulationOptionsSpec:
 
 @dataclass
 class PathSpec(ABC):
-    pass
+    z: int | float
+    opposite_direction: bool
 
 
 @dataclass
@@ -30,7 +31,6 @@ class ProceduralPathSpec(PathSpec):
     segments: list[str]
     angles: list[float]
     lengths: list[int | None]
-    z: int | float
     alpha: float
 
 
@@ -39,7 +39,6 @@ class CSVPathSpec(PathSpec):
     file: str
     east_col_name: str
     north_col_name: str
-    z: int | float
 
 
 @dataclass

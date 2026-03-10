@@ -7,7 +7,8 @@ import yaml
 from pg_rad.exceptions.exceptions import (
     MissingConfigKeyError,
     DimensionError,
-    InvalidConfigValueError
+    InvalidConfigValueError,
+    InvalidYAMLError
 )
 from pg_rad.configs import defaults
 
@@ -45,7 +46,7 @@ class ConfigParser:
 
     def parse(self) -> SimulationSpec:
         self._warn_unknown_keys(
-            section="global",
+            section="root",
             provided=set(self.config.keys()),
             allowed=self._ALLOWED_ROOT_KEYS,
         )
@@ -74,7 +75,7 @@ class ConfigParser:
             data = yaml.safe_load(config_source)
 
         if not isinstance(data, dict):
-            raise ValueError(
+            raise InvalidYAMLError(
                 "Provided path or string is not a valid YAML representation."
             )
 
@@ -86,13 +87,13 @@ class ConfigParser:
                 name=self.config["name"]
             )
         except KeyError as e:
-            raise MissingConfigKeyError("global", {"name"}) from e
+            raise MissingConfigKeyError("root", {"name"}) from e
 
     def _parse_runtime(self) -> RuntimeSpec:
         required = {"speed", "acquisition_time"}
         missing = required - self.config.keys()
         if missing:
-            raise MissingConfigKeyError("global", missing)
+            raise MissingConfigKeyError("root", missing)
 
         return RuntimeSpec(
             speed=float(self.config["speed"]),
@@ -116,7 +117,7 @@ class ConfigParser:
         seed = options.get("seed")
 
         if not isinstance(air_density, float) or air_density <= 0:
-            raise ValueError(
+            raise InvalidConfigValueError(
                 "options.air_density_kg_per_m3 must be a positive float "
                 "in kg/m^3."
             )
@@ -124,7 +125,9 @@ class ConfigParser:
             seed is not None or
             (isinstance(seed, int) and seed <= 0)
         ):
-            raise ValueError("Seed must be a positive integer value.")
+            raise InvalidConfigValueError(
+                "Seed must be a positive integer value."
+            )
 
         return SimulationOptionsSpec(
             air_density=air_density,
@@ -133,14 +136,26 @@ class ConfigParser:
 
     def _parse_path(self) -> PathSpec:
         allowed_csv = {"file", "east_col_name", "north_col_name", "z"}
-        allowed_proc = {"segments", "length", "z", "alpha"}
+        allowed_proc = {"segments", "length", "z", "alpha", "direction"}
 
         path = self.config.get("path")
+
+        direction = path.get("direction", 'positive')
+
+        if direction == 'positive':
+            opposite_direction = False
+        elif direction == 'negative':
+            opposite_direction = True
+        else:
+            raise InvalidConfigValueError(
+                "Direction must be positive or negative."
+            )
+
         if path is None:
-            raise MissingConfigKeyError("global", {"path"})
+            raise MissingConfigKeyError("path")
 
         if not isinstance(path, dict):
-            raise ValueError("Path must be a dictionary.")
+            raise InvalidConfigValueError("Path must be a dictionary.")
 
         if "file" in path:
             self._warn_unknown_keys(
@@ -154,26 +169,31 @@ class ConfigParser:
                 east_col_name=path["east_col_name"],
                 north_col_name=path["north_col_name"],
                 z=path.get("z", 0),
+                opposite_direction=opposite_direction
             )
 
-        if "segments" in path:
+        elif "segments" in path:
             self._warn_unknown_keys(
                 section="path (procedural)",
                 provided=set(path.keys()),
                 allowed=allowed_proc,
             )
-            return self._parse_procedural_path(path)
+            return self._parse_procedural_path(path, opposite_direction)
 
-        raise ValueError("Invalid path configuration.")
+        else:
+            raise InvalidConfigValueError("Invalid path configuration.")
 
     def _parse_procedural_path(
         self,
-        path: Dict[str, Any]
+        path: Dict[str, Any],
+        opposite_direction: bool
     ) -> ProceduralPathSpec:
         raw_segments = path.get("segments")
 
         if not isinstance(raw_segments, List):
-            raise ValueError("path.segments must be a list of segments.")
+            raise InvalidConfigValueError(
+                "path.segments must be a list of segments."
+            )
 
         raw_length = path.get("length")
 
@@ -191,7 +211,8 @@ class ConfigParser:
             angles=angles,
             lengths=lengths,
             z=path.get("z", defaults.DEFAULT_PATH_HEIGHT),
-            alpha=path.get("alpha", defaults.DEFAULT_ALPHA)
+            alpha=path.get("alpha", defaults.DEFAULT_ALPHA),
+            opposite_direction=opposite_direction
         )
 
     def _process_segment_angles(
@@ -209,13 +230,17 @@ class ConfigParser:
 
             elif isinstance(segment, dict):
                 if len(segment) != 1:
-                    raise ValueError("Invalid segment definition.")
+                    raise InvalidConfigValueError(
+                        "Invalid segment definition."
+                    )
                 seg_type, angle = list(segment.items())[0]
                 segments.append(seg_type)
                 angles.append(angle)
 
             else:
-                raise ValueError("Invalid segment entry format.")
+                raise InvalidConfigValueError(
+                    "Invalid segment entry format."
+                )
 
         return segments, angles
 
@@ -239,12 +264,25 @@ class ConfigParser:
         return segment_type in {"turn_left", "turn_right"}
 
     def _parse_point_sources(self) -> List[PointSourceSpec]:
-        source_dict = self.config.get("sources", {})
+        source_dict = self.config.get("sources")
+        if source_dict is None:
+            raise MissingConfigKeyError("sources")
+
+        if not isinstance(source_dict, dict):
+            raise InvalidConfigValueError(
+                "sources must have subkeys representing point source names."
+            )
+
         specs: List[PointSourceSpec] = []
 
         for name, params in source_dict.items():
-
             required = {"activity_MBq", "isotope", "position"}
+            if not isinstance(params, dict):
+                raise InvalidConfigValueError(
+                    f"sources.{name} is not defined correctly."
+                    f" Must have subkeys {required}"
+                )
+
             missing = required - params.keys()
             if missing:
                 raise MissingConfigKeyError(name, missing)
@@ -309,8 +347,13 @@ class ConfigParser:
         return specs
 
     def _parse_detector(self) -> DetectorSpec:
-        det_dict = self.config.get("detector", {})
+        det_dict = self.config.get("detector")
         required = {"name", "is_isotropic"}
+        if not isinstance(det_dict, dict):
+            raise InvalidConfigValueError(
+                "detector is not specified correctly. Must contain at least"
+                f"the subkeys {required}"
+                )
 
         missing = required - det_dict.keys()
         if missing:
@@ -327,7 +370,7 @@ class ConfigParser:
         elif eff:
             pass
         else:
-            raise ValueError(
+            raise InvalidConfigValueError(
                 f"The detector {name} not found in library. Either "
                 f"specify {name}.efficiency or "
                 "choose a detector from the following list: "

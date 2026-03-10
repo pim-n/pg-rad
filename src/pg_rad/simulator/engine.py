@@ -42,7 +42,8 @@ class SimulationEngine:
     def _calculate_count_rate_along_path(self) -> CountRateOutput:
         arc_length, phi = calculate_fluence_along_path(
             self.landscape,
-            self.detector
+            self.detector,
+            acquisition_time=self.runtime_spec.acquisition_time
         )
         return CountRateOutput(arc_length, phi)
 

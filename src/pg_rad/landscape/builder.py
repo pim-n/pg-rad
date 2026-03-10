@@ -12,7 +12,8 @@ from pg_rad.inputparser.specs import (
     SimulationSpec,
     CSVPathSpec,
     AbsolutePointSourceSpec,
-    RelativePointSourceSpec
+    RelativePointSourceSpec,
+    DetectorSpec
 )
 
 from pg_rad.path.path import Path, path_from_RT90
@@ -30,6 +31,7 @@ class LandscapeBuilder:
         self._point_sources = []
         self._size = None
         self._air_density = 1.243
+        self._detector = None
 
         logger.debug(f"LandscapeBuilder initialized: {self.name}")
 
@@ -58,10 +60,12 @@ class LandscapeBuilder:
         self,
         sim_spec: SimulationSpec
     ):
-        segments = sim_spec.path.segments
-        lengths = sim_spec.path.lengths
-        angles = sim_spec.path.angles
-        alpha = sim_spec.path.alpha
+        path = sim_spec.path
+        segments = path.segments
+        lengths = path.lengths
+        angles = path.angles
+        alpha = path.alpha
+        z = path.z
 
         sg = SegmentedRoadGenerator(
             ds=sim_spec.runtime.speed * sim_spec.runtime.acquisition_time,
@@ -76,7 +80,11 @@ class LandscapeBuilder:
             alpha=alpha
         )
 
-        self._path = Path(list(zip(x, y)))
+        self._path = Path(
+            list(zip(x, y)),
+            z=z,
+            opposite_direction=path.opposite_direction
+        )
         self._fit_landscape_to_path()
         return self
 
@@ -89,7 +97,8 @@ class LandscapeBuilder:
             df=df,
             east_col=spec.east_col_name,
             north_col=spec.north_col_name,
-            z=spec.z
+            z=spec.z,
+            opposite_direction=spec.opposite_direction
         )
 
         self._fit_landscape_to_path()
@@ -150,6 +159,10 @@ class LandscapeBuilder:
                 position=pos,
                 name=s.name
             ))
+
+    def set_detector(self, spec: DetectorSpec) -> Self:
+        self._detector = spec
+        return self
 
     def _fit_landscape_to_path(self) -> None:
         """The size of the landscape will be updated if
@@ -221,6 +234,7 @@ class LandscapeBuilder:
             name=self.name,
             path=self._path,
             point_sources=self._point_sources,
+            detector=self._detector,
             size=self._size,
             air_density=self._air_density
         )

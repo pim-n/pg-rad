@@ -1,6 +1,7 @@
 import logging
 
 from pg_rad.path.path import Path
+from pg_rad.detector.detectors import AngularDetector, IsotropicDetector
 from pg_rad.objects.sources import PointSource
 
 
@@ -17,6 +18,7 @@ class Landscape:
             path: Path,
             air_density: float,
             point_sources: list[PointSource],
+            detector: IsotropicDetector | AngularDetector,
             size: tuple[int, int, int]
             ):
         """Initialize a landscape.
@@ -34,5 +36,6 @@ class Landscape:
         self.point_sources = point_sources
         self.size = size
         self.air_density = air_density
+        self.detector = detector
 
         logger.debug(f"Landscape created: {self.name}")

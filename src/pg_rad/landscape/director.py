@@ -45,5 +45,6 @@ class LandscapeDirector:
                 sim_spec=config,
             )
         lb.set_point_sources(*config.point_sources)
+        lb.set_detector(config.detector)
         landscape = lb.build()
         return landscape

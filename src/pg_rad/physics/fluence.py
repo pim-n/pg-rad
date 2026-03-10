@@ -47,14 +47,14 @@ def phi(
     return phi_r
 
 
-def calculate_fluence_at(
+def calculate_count_rate_per_second(
     landscape: "Landscape",
     pos: np.ndarray,
     detector: IsotropicDetector | AngularDetector,
     tangent_vectors: np.ndarray,
     scaling=1E6
 ):
-    """Compute fluence at an arbitrary position in the landscape.
+    """Compute count rate in s^-1 m^-2 at a position in the landscape.
 
     Args:
         landscape (Landscape): The landscape to compute.
@@ -63,7 +63,7 @@ def calculate_fluence_at(
             Detector object, needed to compute correct efficiency.
 
     Returns:
-        total_phi (np.ndarray): (N,) array of fluences.
+        total_phi (np.ndarray): (N,) array of count rates per second.
     """
     pos = np.atleast_2d(pos)
     total_phi = np.zeros(pos.shape[0])
@@ -103,29 +103,41 @@ def calculate_fluence_at(
 def calculate_fluence_along_path(
     landscape: "Landscape",
     detector: "IsotropicDetector | AngularDetector",
-    points_per_segment: int = 10
+    acquisition_time: int,
+    points_per_segment: int = 10,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute the fluence along a full path in the landscape.
+
+    Args:
+        landscape (Landscape): _description_
+        detector (IsotropicDetector | AngularDetector): _description_
+        points_per_segment (int, optional): _description_. Defaults to 100.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: _description_
+    """
+
     path = landscape.path
     num_points = len(path.x_list)
+    num_segments = len(path.segments)
 
-    dx = np.diff(path.x_list)
-    dy = np.diff(path.y_list)
-    segment_lengths = np.sqrt(dx**2 + dy**2)
-
+    segment_lengths = np.array([seg.length for seg in path.segments])
+    ds = segment_lengths[0]
     original_distances = np.zeros(num_points)
     original_distances[1:] = np.cumsum(segment_lengths)
 
     # arc lengths at which to evaluate the path
-    s = np.linspace(
-        0,
-        original_distances[-1],
-        num=num_points * points_per_segment)
+    total_subpoints = num_segments * points_per_segment
+    s = np.linspace(0, original_distances[-1], total_subpoints)
 
     # Interpolate x and y as functions of arc length
     xnew = np.interp(s, original_distances, path.x_list)
     ynew = np.interp(s, original_distances, path.y_list)
-    z = np.full(xnew.shape, path.z)
+    z = np.full_like(xnew, path.z)
     full_positions = np.c_[xnew, ynew, z]
+
+    if path.opposite_direction:
+        full_positions = np.flip(full_positions, axis=0)
 
     # to compute the angle between sources and the direction of travel, we
     # compute tangent vectors along the path.
@@ -134,10 +146,19 @@ def calculate_fluence_along_path(
     tangent_vectors = np.c_[dx_ds, dy_ds, np.zeros_like(dx_ds)]
     tangent_vectors /= np.linalg.norm(tangent_vectors, axis=1, keepdims=True)
 
-    phi_result = calculate_fluence_at(
-        landscape,
-        full_positions,
-        detector,
-        tangent_vectors)
+    count_rate = calculate_count_rate_per_second(
+        landscape, full_positions, detector, tangent_vectors
+    )
 
-    return s, phi_result
+    count_rate *= (acquisition_time / points_per_segment)
+
+    count_rate_segs = count_rate.reshape(num_segments, points_per_segment)
+    integrated = np.trapezoid(
+        count_rate_segs,
+        dx=ds/points_per_segment,
+        axis=1
+    )
+
+    result = np.zeros(num_points)
+    result[1:] = integrated
+    return original_distances, result
