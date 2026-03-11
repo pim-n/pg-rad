@@ -7,7 +7,7 @@ from pg_rad.simulator.outputs import (
     SourceOutput
 )
 from pg_rad.detector.detectors import IsotropicDetector, AngularDetector
-from pg_rad.physics.fluence import calculate_fluence_along_path
+from pg_rad.physics.fluence import calculate_counts_along_path
 from pg_rad.utils.projection import minimal_distance_to_path
 from pg_rad.inputparser.specs import RuntimeSpec, SimulationOptionsSpec
 
@@ -40,7 +40,7 @@ class SimulationEngine:
         )
 
     def _calculate_count_rate_along_path(self) -> CountRateOutput:
-        arc_length, phi = calculate_fluence_along_path(
+        arc_length, phi = calculate_counts_along_path(
             self.landscape,
             self.detector,
             acquisition_time=self.runtime_spec.acquisition_time

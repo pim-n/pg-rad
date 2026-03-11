@@ -100,13 +100,13 @@ def calculate_count_rate_per_second(
     return total_phi
 
 
-def calculate_fluence_along_path(
+def calculate_counts_along_path(
     landscape: "Landscape",
     detector: "IsotropicDetector | AngularDetector",
     acquisition_time: int,
     points_per_segment: int = 10,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Compute the fluence along a full path in the landscape.
+    """Compute the counts recorded in each acquisition period in the landscape.
 
     Args:
         landscape (Landscape): _description_
@@ -114,7 +114,8 @@ def calculate_fluence_along_path(
         points_per_segment (int, optional): _description_. Defaults to 100.
 
     Returns:
-        Tuple[np.ndarray, np.ndarray]: _description_
+        Tuple[np.ndarray, np.ndarray]: Array of acquisition points and
+            integrated count rates.
     """
 
     path = landscape.path
