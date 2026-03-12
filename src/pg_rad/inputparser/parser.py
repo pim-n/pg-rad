@@ -11,6 +11,7 @@ from pg_rad.exceptions.exceptions import (
     InvalidYAMLError
 )
 from pg_rad.configs import defaults
+from pg_rad.isotopes.isotope import get_isotope
 
 from .specs import (
     MetadataSpec,
@@ -276,7 +277,9 @@ class ConfigParser:
         specs: List[PointSourceSpec] = []
 
         for name, params in source_dict.items():
-            required = {"activity_MBq", "isotope", "position"}
+            required = {
+                "activity_MBq", "isotope", "position", "gamma_energy_keV"
+            }
             if not isinstance(params, dict):
                 raise InvalidConfigValueError(
                     f"sources.{name} is not defined correctly."
@@ -288,7 +291,10 @@ class ConfigParser:
                 raise MissingConfigKeyError(name, missing)
 
             activity = params.get("activity_MBq")
-            isotope = params.get("isotope")
+            isotope_name = params.get("isotope")
+            gamma_energy_keV = params.get("gamma_energy_keV")
+
+            isotope = get_isotope(isotope_name, gamma_energy_keV)
 
             if not isinstance(activity, int | float) or activity <= 0:
                 raise InvalidConfigValueError(

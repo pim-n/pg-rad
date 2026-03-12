@@ -105,7 +105,7 @@ class ResultPlotter:
         data = [
             [
                 s.name,
-                s.isotope,
+                s.isotope+f" ({s.primary_gamma} keV)",
                 s.activity,
                 "("+", ".join(f"{val:.2f}" for val in s.position)+")",
                 round(s.dist_from_path, 2)

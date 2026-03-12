@@ -62,6 +62,7 @@ class SimulationEngine:
                 SourceOutput(
                     s.name,
                     s.isotope.name,
+                    s.isotope.E,
                     s.activity,
                     s.pos,
                     dist_to_path)

@@ -13,6 +13,7 @@ class CountRateOutput:
 class SourceOutput:
     name: str
     isotope: str
+    primary_gamma: float
     activity: float
     position: Tuple[float, float, float]
     dist_from_path: float

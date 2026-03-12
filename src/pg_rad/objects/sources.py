@@ -12,7 +12,7 @@ class PointSource(BaseObject):
     def __init__(
             self,
             activity_MBq: int,
-            isotope: str,
+            isotope: Isotope,
             position: tuple[float, float, float] = (0, 0, 0),
             name: str | None = None,
             color: str = 'red'
@@ -40,7 +40,7 @@ class PointSource(BaseObject):
         super().__init__(position, name, color)
 
         self.activity = activity_MBq
-        self.isotope: Isotope = get_isotope(isotope)
+        self.isotope = isotope
 
         logger.debug(f"Source created: {self.name}")
 

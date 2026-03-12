@@ -1,5 +1,8 @@
-from typing import Dict, Type
+from importlib.resources import files
 
+from pandas import read_csv
+
+from pg_rad.configs.filepaths import ISOTOPE_TABLE
 from pg_rad.exceptions.exceptions import InvalidIsotopeError
 from pg_rad.physics.attenuation import get_mass_attenuation_coeff
 
@@ -30,22 +33,35 @@ class Isotope:
         self.mu_mass_air = get_mass_attenuation_coeff(E / 1000)
 
 
-class CS137(Isotope):
-    def __init__(self):
-        super().__init__(
-            name="Cs-137",
-            E=661.66,
-            b=0.851
+def get_isotope(isotope: str, energy_gamma_keV: float) -> Isotope:
+    """Lazy factory function to create isotope objects."""
+    path = files('pg_rad.data').joinpath(ISOTOPE_TABLE)
+    df = read_csv(path)
+
+    isotope_df = df[df['isotope'] == isotope]
+
+    if isotope_df.empty:
+        raise InvalidIsotopeError(f"No data available for isotope {isotope}.")
+
+    tol = 0.01 * energy_gamma_keV
+    closest_energy = isotope_df[
+        (isotope_df['gamma_energy_keV'] >= energy_gamma_keV - tol) &
+        (isotope_df['gamma_energy_keV'] <= energy_gamma_keV + tol)
+    ]
+
+    if closest_energy.empty:
+        available_gammas = ', '.join(
+            str(x)+' keV' for x in isotope_df['gamma_energy_keV'].to_list()
+        )
+        raise InvalidIsotopeError(
+            f"No gamma of {energy_gamma_keV}±{tol} keV "
+            f"found for isotope {isotope}. "
+            f"Available gammas are: {available_gammas}"
         )
 
-
-preset_isotopes: Dict[str, Type[Isotope]] = {
-    "Cs137": CS137
-}
-
-
-def get_isotope(isotope_str: str) -> Isotope:
-    """Lazy factory function to create isotope objects."""
-    if isotope_str not in preset_isotopes:
-        raise InvalidIsotopeError(f"Unknown isotope: {isotope_str}")
-    return preset_isotopes[isotope_str]()
+    matched_row = closest_energy.iloc[0]
+    return Isotope(
+        name=isotope,
+        E=matched_row['gamma_energy_keV'],
+        b=matched_row['branching_ratio']
+    )

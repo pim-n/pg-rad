@@ -59,7 +59,7 @@ def main():
             length: 1000
             segments:
                 - straight
-                - turn_left
+                - turn_left: 45
             direction: negative
 
         sources:
@@ -67,6 +67,7 @@ def main():
                 activity_MBq: 100
                 position: [250, 100, 0]
                 isotope: Cs137
+                gamma_energy_keV: 661
 
         detector:
             name: dummy
