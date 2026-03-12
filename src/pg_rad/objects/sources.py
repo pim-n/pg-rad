@@ -1,7 +1,7 @@
 import logging
 
 from .objects import BaseObject
-from pg_rad.isotopes.isotope import Isotope, get_isotope
+from pg_rad.isotopes.isotope import Isotope
 
 logger = logging.getLogger(__name__)
 
