@@ -4,7 +4,7 @@ from pandas import read_csv
 
 from pg_rad.configs.filepaths import ISOTOPE_TABLE
 from pg_rad.exceptions.exceptions import InvalidIsotopeError
-from pg_rad.physics.attenuation import get_mass_attenuation_coeff
+from pg_rad.utils.interpolators import get_mass_attenuation_coeff
 
 
 class Isotope:
