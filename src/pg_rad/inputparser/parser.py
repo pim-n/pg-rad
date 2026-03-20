@@ -353,41 +353,11 @@ class ConfigParser:
         return specs
 
     def _parse_detector(self) -> DetectorSpec:
-        det_dict = self.config.get("detector")
-        required = {"name", "is_isotropic"}
-        if not isinstance(det_dict, dict):
-            raise InvalidConfigValueError(
-                "detector is not specified correctly. Must contain at least"
-                f"the subkeys {required}"
-                )
+        det_name = self.config.get("detector")
+        if not det_name:
+            raise MissingConfigKeyError("detector")
 
-        missing = required - det_dict.keys()
-        if missing:
-            raise MissingConfigKeyError("detector", missing)
-
-        name = det_dict.get("name")
-        is_isotropic = det_dict.get("is_isotropic")
-        eff = det_dict.get("efficiency")
-
-        default_detectors = defaults.DETECTOR_EFFICIENCIES
-
-        if name in default_detectors.keys() and not eff:
-            eff = default_detectors[name]
-        elif eff:
-            pass
-        else:
-            raise InvalidConfigValueError(
-                f"The detector {name} not found in library. Either "
-                f"specify {name}.efficiency or "
-                "choose a detector from the following list: "
-                f"{default_detectors.keys()}."
-            )
-
-        return DetectorSpec(
-            name=name,
-            efficiency=eff,
-            is_isotropic=is_isotropic
-        )
+        return DetectorSpec(name=det_name)
 
     def _warn_unknown_keys(self, section: str, provided: set, allowed: set):
         unknown = provided - allowed

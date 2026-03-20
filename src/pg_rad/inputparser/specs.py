@@ -67,8 +67,6 @@ class RelativePointSourceSpec(PointSourceSpec):
 @dataclass
 class DetectorSpec:
     name: str
-    efficiency: float
-    is_isotropic: bool
 
 
 @dataclass
