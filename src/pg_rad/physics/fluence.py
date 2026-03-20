@@ -4,6 +4,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from pg_rad.landscape.landscape import Landscape
+    from pg_rad.detector.detector import Detector
 
 
 def phi(
@@ -12,6 +13,7 @@ def phi(
         branching_ratio: float,
         mu_mass_air: float,
         air_density: float,
+        eff: float
         ) -> float:
     """Compute the contribution of a single point source to the
     primary photon fluence rate phi at position (x,y,z).
@@ -29,42 +31,70 @@ def phi(
     """
 
     # Linear photon attenuation coefficient in m^-1.
-    mu_mass_air *= 0.1
-    mu_air = mu_mass_air * air_density
+    mu_air = 0.1 * mu_mass_air * air_density
 
     phi_r = (
         activity
+        * eff
         * branching_ratio
         * np.exp(-mu_air * r)
-        / (4 * np.pi * r**2)
-    )
+    ) / (4 * np.pi * r**2)
 
     return phi_r
 
 
-def calculate_fluence_at(landscape: "Landscape", pos: np.ndarray, scaling=1E6):
-    """Compute fluence at an arbitrary position in the landscape.
+def calculate_count_rate_per_second(
+    landscape: "Landscape",
+    pos: np.ndarray,
+    detector: "Detector",
+    scaling=1E6
+):
+    """Compute count rate in s^-1 m^-2 at a position in the landscape.
 
     Args:
         landscape (Landscape): The landscape to compute.
         pos (np.ndarray): (N, 3) array of positions.
+        detector (Detector):
+            Detector object, needed to compute correct efficiency.
 
     Returns:
-        total_phi (np.ndarray): (N,) array of fluences.
+        total_phi (np.ndarray): (N,) array of count rates per second.
     """
     pos = np.atleast_2d(pos)
     total_phi = np.zeros(pos.shape[0])
 
     for source in landscape.point_sources:
-        r = np.linalg.norm(pos - np.array(source.pos), axis=1)
+        # See Bukartas (2021) page 25 for incidence angle math
+        source_to_detector = pos - np.array(source.pos)
+        r = np.linalg.norm(source_to_detector, axis=1)
         r = np.maximum(r, 1E-3)  # enforce minimum distance of 1cm
+
+        if not detector.is_isotropic:
+            v = np.zeros_like(pos)
+            v[1:] = pos[1:] - pos[:-1]
+            v[0] = v[1]  # handle first point
+            vx, vy = v[:, 0], v[:, 1]
+
+            r_vec = pos - np.array(source.pos)
+            rx, ry = r_vec[:, 0], r_vec[:, 1]
+
+            theta = np.arctan2(vy, vx) - np.arctan2(ry, rx)
+
+            # normalise to [-pi, pi] and convert to degrees
+            theta = (theta + np.pi) % (2 * np.pi) - np.pi
+            theta_deg = np.degrees(theta)
+
+            eff = detector.get_efficiency(source.isotope.E, theta_deg)
+        else:
+            eff = detector.get_efficiency(source.isotope.E)
 
         phi_source = phi(
             r=r,
             activity=source.activity * scaling,
             branching_ratio=source.isotope.b,
             mu_mass_air=source.isotope.mu_mass_air,
-            air_density=landscape.air_density
+            air_density=landscape.air_density,
+            eff=eff
         )
 
         total_phi += phi_source
@@ -72,28 +102,56 @@ def calculate_fluence_at(landscape: "Landscape", pos: np.ndarray, scaling=1E6):
     return total_phi
 
 
-def calculate_fluence_along_path(
+def calculate_counts_along_path(
     landscape: "Landscape",
-    points_per_segment: int = 10
+    detector: "Detector",
+    velocity: float,
+    points_per_segment: int = 10,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute the counts recorded in each acquisition period in the landscape.
+
+    Args:
+        landscape (Landscape): _description_
+        detector (Detector): _description_
+        points_per_segment (int, optional): _description_. Defaults to 100.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: Array of acquisition points and
+            integrated count rates.
+    """
+
     path = landscape.path
+    num_points = len(path.x_list)
     num_segments = len(path.segments)
 
-    xnew = np.linspace(
-        path.x_list[0],
-        path.x_list[-1],
-        num=num_segments*points_per_segment)
+    segment_lengths = np.array([seg.length for seg in path.segments])
+    original_distances = np.zeros(num_points)
+    original_distances[1:] = np.cumsum(segment_lengths)
 
-    ynew = np.interp(xnew, path.x_list, path.y_list)
+    # arc lengths at which to evaluate the path
+    total_subpoints = num_segments * points_per_segment
+    s = np.linspace(0, original_distances[-1], total_subpoints)
 
-    z = np.full(xnew.shape, path.z)
+    # Interpolate x and y as functions of arc length
+    xnew = np.interp(s, original_distances, path.x_list)
+    ynew = np.interp(s, original_distances, path.y_list)
+    z = np.full_like(xnew, path.z)
     full_positions = np.c_[xnew, ynew, z]
-    phi_result = calculate_fluence_at(landscape, full_positions)
 
-    dist_travelled = np.linspace(
-        full_positions[0, 0],
-        path.length,
-        len(phi_result)
+    if path.opposite_direction:
+        full_positions = np.flip(full_positions, axis=0)
+
+    # [counts/s]
+    cps = calculate_count_rate_per_second(
+        landscape, full_positions, detector
     )
 
-    return dist_travelled, phi_result
+    # reshape so each segment is on a row
+    cps_per_seg = cps.reshape(num_segments, points_per_segment)
+
+    du = s[1] - s[0]
+    integrated_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
+    int_counts_result = np.zeros(num_points)
+    int_counts_result[1:] = integrated_counts
+
+    return original_distances, s, cps, int_counts_result

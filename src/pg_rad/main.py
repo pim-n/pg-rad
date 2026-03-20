@@ -3,13 +3,14 @@ import logging
 import sys
 
 from pandas.errors import ParserError
-from yaml import YAMLError
 
 from pg_rad.exceptions.exceptions import (
     MissingConfigKeyError,
     OutOfBoundsError,
     DimensionError,
-    InvalidIsotopeError
+    InvalidConfigValueError,
+    InvalidIsotopeError,
+    InvalidYAMLError
 )
 from pg_rad.logger.logger import setup_logger
 from pg_rad.inputparser.parser import ConfigParser
@@ -54,24 +55,30 @@ def main():
         acquisition_time: 1
 
         path:
-            length: 1000
+            length:
+                - 500
+                - 500
             segments:
                 - straight
+                - turn_left: 45
+            direction: negative
 
         sources:
             test_source:
-                activity_MBq: 1000
-                position: [500, 100, 0]
-                isotope: CS137
+                activity_MBq: 100
+                position: [250, 100, 0]
+                isotope: Cs137
+                gamma_energy_keV: 661
+
+        detector: LU_NaI_3inch
         """
 
         cp = ConfigParser(test_yaml).parse()
         landscape = LandscapeDirector.build_from_config(cp)
-
         output = SimulationEngine(
             landscape=landscape,
             runtime_spec=cp.runtime,
-            sim_spec=cp.options
+            sim_spec=cp.options,
         ).simulate()
 
         plotter = ResultPlotter(landscape, output)
@@ -81,7 +88,6 @@ def main():
         try:
             cp = ConfigParser(args.config).parse()
             landscape = LandscapeDirector.build_from_config(cp)
-
             output = SimulationEngine(
                 landscape=landscape,
                 runtime_spec=cp.runtime,
@@ -92,20 +98,20 @@ def main():
             plotter.plot()
         except (
             MissingConfigKeyError,
-            KeyError,
-            YAMLError,
-        ):
+            KeyError
+        ) as e:
+            logger.critical(e)
             logger.critical(
-                "The provided config file is invalid. "
-                "Check the log above. You can consult the documentation for "
-                "an explanation of how to define a config file."
+                "The config file is missing required keys or may be an "
+                "invalid YAML file. Check the log above. Consult the "
+                "documentation for examples of how to write a config file."
                 )
             sys.exit(1)
         except (
             OutOfBoundsError,
             DimensionError,
             InvalidIsotopeError,
-            ValueError
+            InvalidConfigValueError
         ) as e:
             logger.critical(e)
             logger.critical(
@@ -116,8 +122,10 @@ def main():
 
         except (
             FileNotFoundError,
-            ParserError
-        ):
+            ParserError,
+            InvalidYAMLError
+        ) as e:
+            logger.critical(e)
             sys.exit(1)
 
 

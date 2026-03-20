@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 class SegmentedRoadGenerator(BaseRoadGenerator):
     def __init__(
         self,
-        length: int | float | list[int | float],
         ds: int | float,
         velocity: int | float,
         mu: float = 0.7,
@@ -26,7 +25,6 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
         """Initialize a SegmentedRoadGenerator with given or random seed.
 
         Args:
-            length (int | float): The total length of the road in meters.
             ds (int | float): The step size in meters.
             velocity (int | float): Velocity in meters per second.
             mu (float): Coefficient of friction. Defaults to 0.7 (dry asphalt).
@@ -34,18 +32,13 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
             seed (int | None, optional): Set a seed for the generator.
                 Defaults to random seed.
         """
-
-        if isinstance(length, list):
-            length = sum(
-                [seg_len for seg_len in length if seg_len is not None]
-            )
-        super().__init__(length, ds, velocity, mu, g, seed)
+        super().__init__(ds, velocity, mu, g, seed)
 
     def generate(
             self,
             segments: list[str],
-            lengths: list[int | float] | None = None,
-            angles: list[int | float] | None = None,
+            lengths: list[int | float],
+            angles: list[float | None],
             alpha: float = defaults.DEFAULT_ALPHA,
             min_turn_angle: float = defaults.DEFAULT_MIN_TURN_ANGLE,
             max_turn_angle: float = defaults.DEFAULT_MAX_TURN_ANGLE
@@ -54,6 +47,8 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
 
         Args:
             segments (list[str]): List of segments.
+            lengths (list[int | float]): List of segment lengths.
+            angles (list[float | None]): List of angles.
             alpha (float, optional): Dirichlet concentration parameter.
                 A higher value leads to more uniform apportionment of the
                 length amongst the segments, while a lower value allows more
@@ -88,26 +83,29 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
 
         self.segments = segments
         self.alpha = alpha
-        num_points = np.ceil(self.length / self.ds).astype(int)
+
+        total_length = sum(lengths)
+        num_points = np.ceil(total_length / self.ds).astype(int)
 
         # divide num_points into len(segments) randomly sized parts.
-        if isinstance(self.length, list):
-            parts = self.length
+        if len(lengths) == len(segments):
+            parts = np.array([seg_len / total_length for seg_len in lengths])
         else:
             parts = self._rng.dirichlet(
                 np.full(len(segments), alpha),
                 size=1)[0]
-            parts = parts * num_points
-            parts = np.round(parts).astype(int)
 
-            # correct round off so the sum of parts is still total length L.
-            if sum(parts) != num_points:
-                parts[0] += num_points - sum(parts)
+        parts = parts * num_points
+        parts = np.round(parts).astype(int)
+
+        # correct round off so the sum of parts is still total length L.
+        if sum(parts) != num_points:
+            parts[0] += num_points - sum(parts)
 
         curvature = np.zeros(num_points)
         current_index = 0
 
-        for seg_name, seg_length in zip(segments, parts):
+        for seg_name, seg_length, seg_angle in zip(segments, parts, angles):
             seg_function = prefabs.PREFABS[seg_name]
 
             if seg_name == 'straight':
@@ -128,12 +126,15 @@ class SegmentedRoadGenerator(BaseRoadGenerator):
                         f"({R_min}, {R_max_angle})"
                     )
 
-                rand_radius = self._rng.uniform(R_min, R_max_angle)
+                if seg_angle:
+                    radius = seg_length / np.deg2rad(seg_angle)
+                else:
+                    radius = self._rng.uniform(R_min, R_max_angle)
 
                 if seg_name.startswith("u_turn"):
-                    curvature_s = seg_function(rand_radius)
+                    curvature_s = seg_function(radius)
                 else:
-                    curvature_s = seg_function(seg_length, rand_radius)
+                    curvature_s = seg_function(seg_length, radius)
 
             curvature[current_index:(current_index + seg_length)] = curvature_s
             current_index += seg_length

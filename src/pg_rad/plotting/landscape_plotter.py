@@ -69,7 +69,7 @@ class LandscapeSlicePlotter:
         ax.set_ylabel("Y [m]")
         ax.set_title(f"Landscape (top-down, z = {self.z})")
 
-    def _draw_path(self, ax, landscape):
+    def _draw_path(self, ax, landscape: Landscape):
         if landscape.path.z <= self.z:
             ax.plot(
                 landscape.path.x_list,
@@ -79,6 +79,9 @@ class LandscapeSlicePlotter:
                 markersize=3,
                 linewidth=1
             )
+            if len(landscape.path.x_list) >= 2:
+                ax = self._draw_path_direction_arrow(ax, landscape.path)
+
         else:
             logger.warning(
                 "Path is above the slice height z."
@@ -113,3 +116,35 @@ class LandscapeSlicePlotter:
                     f"Source {s.name} is above slice height z."
                     "It will not show on the plot."
                     )
+
+    def _draw_path_direction_arrow(self, ax, path) -> Axes:
+        inset_ax = ax.inset_axes([0.8, 0.1, 0.15, 0.15])
+
+        x_start, y_start = path.x_list[0], path.y_list[0]
+        x_end, y_end = path.x_list[1], path.y_list[1]
+
+        dx = x_end - x_start
+        dy = y_end - y_start
+
+        if path.opposite_direction:
+            dx = -dx
+            dy = -dy
+
+        length = 10
+        dx_norm = dx / (dx**2 + dy**2)**0.5 * length
+        dy_norm = dy / (dx**2 + dy**2)**0.5 * length
+
+        inset_ax.arrow(
+            0, 0,
+            dx_norm, dy_norm,
+            head_width=5, head_length=5,
+            fc='red', ec='red',
+            zorder=4, linewidth=1
+        )
+
+        inset_ax.set_xlim(-2*length, 2*length)
+        inset_ax.set_ylim(-2*length, 2*length)
+        inset_ax.set_title("Direction", fontsize=8)
+        inset_ax.set_xticks([])
+        inset_ax.set_yticks([])
+        return ax

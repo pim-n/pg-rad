@@ -1,6 +1,6 @@
 import pytest
 
-from pg_rad.physics import get_mass_attenuation_coeff
+from pg_rad.utils.interpolators import get_mass_attenuation_coeff
 
 
 @pytest.mark.parametrize("energy,mu", [
@@ -8,7 +8,7 @@ from pg_rad.physics import get_mass_attenuation_coeff
     (1.00000E-02, 5.120E+00),
     (1.00000E-01, 1.541E-01),
     (1.00000E+00, 6.358E-02),
-    (1.00000E+01, 2.045E-02) 
+    (1.00000E+01, 2.045E-02)
 ])
 def test_exact_attenuation_retrieval(energy, mu):
     """

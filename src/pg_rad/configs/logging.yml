@@ -3,10 +3,13 @@ disable_existing_loggers: false
 formatters:
   simple:
     format: '%(asctime)s - %(levelname)s: %(message)s'
+  colored:
+    '()': pg_rad.logger.logger.ColorFormatter
+    format: '%(asctime)s - %(levelname)s: %(message)s'
 handlers:
   stdout:
     class: logging.StreamHandler
-    formatter: simple
+    formatter: colored
     stream: ext://sys.stdout
 loggers:
   root:

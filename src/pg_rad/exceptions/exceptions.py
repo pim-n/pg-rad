@@ -10,6 +10,10 @@ class InvalidCSVError(DataLoadError):
     """Raised when a file is not a valid CSV."""
 
 
+class InvalidYAMLError(DataLoadError):
+    """Raised when a file is not a valid YAML."""
+
+
 class OutOfBoundsError(Exception):
     """Raised when an object is attempted to be placed out of bounds."""
 
@@ -18,7 +22,11 @@ class MissingConfigKeyError(KeyError):
     """Raised when a (nested) config key is missing in the config."""
     def __init__(self, key, subkey=None):
         if subkey:
-            self.message = f"Missing key in {key}: {', '.join(list(subkey))}"
+            if isinstance(subkey, str):
+                pass
+            elif isinstance(subkey, set):
+                subkey = ', '.join(list(subkey))
+            self.message = f"Missing key in {key}: {subkey}"
         else:
             self.message = f"Missing key: {key}"
 
@@ -31,3 +39,7 @@ class DimensionError(ValueError):
 
 class InvalidIsotopeError(ValueError):
     """Raised if attempting to load an isotope that is not valid."""
+
+
+class InvalidConfigValueError(ValueError):
+    """Raised if a config key has an incorrect type or value."""
