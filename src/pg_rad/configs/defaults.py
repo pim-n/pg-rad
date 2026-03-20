@@ -23,3 +23,10 @@ DETECTOR_EFFICIENCIES = {
     "NaIR": 0.0216,
     "NaIF": 0.0254
 }
+
+# A, B, C parameters for different detector types
+# for formula FWHM(E) = sqrt(A + B*E + C*E^2)
+FWHM_PARAMS = {
+    "NaI": (-70.55, 2.678, 0.000602),
+    "HPGe": (1.778, 0.001843, 0.000001)
+}
