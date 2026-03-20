@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pg_rad.objects import PointSource
+from pg_rad.objects.sources import PointSource
 
 
 @pytest.fixture
