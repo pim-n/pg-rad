@@ -4,7 +4,6 @@ import sys
 
 from pandas.errors import ParserError
 
-from pg_rad.detector.builder import DetectorBuilder
 from pg_rad.exceptions.exceptions import (
     MissingConfigKeyError,
     OutOfBoundsError,
@@ -56,7 +55,9 @@ def main():
         acquisition_time: 1
 
         path:
-            length: 1000
+            length:
+                - 500
+                - 500
             segments:
                 - straight
                 - turn_left: 45
@@ -69,19 +70,15 @@ def main():
                 isotope: Cs137
                 gamma_energy_keV: 661
 
-        detector:
-            name: dummy
-            is_isotropic: True
+        detector: LU_NaI_3inch
         """
 
         cp = ConfigParser(test_yaml).parse()
         landscape = LandscapeDirector.build_from_config(cp)
-        detector = DetectorBuilder(cp.detector).build()
         output = SimulationEngine(
             landscape=landscape,
             runtime_spec=cp.runtime,
             sim_spec=cp.options,
-            detector=detector
         ).simulate()
 
         plotter = ResultPlotter(landscape, output)
@@ -91,10 +88,8 @@ def main():
         try:
             cp = ConfigParser(args.config).parse()
             landscape = LandscapeDirector.build_from_config(cp)
-            detector = DetectorBuilder(cp.detector).build()
             output = SimulationEngine(
                 landscape=landscape,
-                detector=detector,
                 runtime_spec=cp.runtime,
                 sim_spec=cp.options
             ).simulate()

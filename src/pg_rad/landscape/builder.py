@@ -15,7 +15,7 @@ from pg_rad.inputparser.specs import (
     RelativePointSourceSpec,
     DetectorSpec
 )
-
+from pg_rad.detector.detector import load_detector
 from pg_rad.path.path import Path, path_from_RT90
 
 from road_gen.generators.segmented_road_generator import SegmentedRoadGenerator
@@ -161,7 +161,7 @@ class LandscapeBuilder:
             ))
 
     def set_detector(self, spec: DetectorSpec) -> Self:
-        self._detector = spec
+        self._detector = load_detector(spec.name)
         return self
 
     def _fit_landscape_to_path(self) -> None:
