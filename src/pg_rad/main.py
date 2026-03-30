@@ -29,9 +29,9 @@ def main():
         help="Build from a config file."
     )
     parser.add_argument(
-        "--test",
+        "--example",
         action="store_true",
-        help="Load and run the test landscape."
+        help="Load and run an example landscape."
     )
     parser.add_argument(
         "--loglevel",
@@ -48,9 +48,9 @@ def main():
     setup_logger(args.loglevel)
     logger = logging.getLogger(__name__)
 
-    if args.test:
-        test_yaml = """
-        name: Test landscape
+    if args.example:
+        example_yaml = """
+        name: Example landscape
         speed: 8.33
         acquisition_time: 1
 
@@ -66,14 +66,14 @@ def main():
         sources:
             test_source:
                 activity_MBq: 100
-                position: [250, 100, 0]
+                position: [250, 30, 0]
                 isotope: Cs137
                 gamma_energy_keV: 661
 
         detector: LU_NaI_3inch
         """
 
-        cp = ConfigParser(test_yaml).parse()
+        cp = ConfigParser(example_yaml).parse()
         landscape = LandscapeDirector.build_from_config(cp)
         output = SimulationEngine(
             landscape=landscape,
