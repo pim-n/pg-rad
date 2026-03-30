@@ -145,8 +145,13 @@ class LandscapeBuilder:
                     along_path=along_path,
                     side=s.side,
                     dist_from_path=s.dist_from_path)
-            if any(
-                p < 0 or p >= s for p, s in zip(pos, self._size)
+
+            # we dont support -x values, but negative y values are possible as
+            # the path is centered in the y direction.
+            print(pos)
+            if not (
+                (0 < pos[0] < self._size[0]) and
+                (-0.5 * self._size[1] < pos[1] < 0.5 * self._size[1])
             ):
                 raise OutOfBoundsError(
                     "One or more sources attempted to "
@@ -174,7 +179,7 @@ class LandscapeBuilder:
             or any(p > s for p, s in zip(self._path.size, self._size))
         )
 
-        if needs_resize:
+        if needs_resize:    
             if not self._size:
                 logger.debug("Because no Landscape size was set, "
                              "it will now set to path dimensions.")
