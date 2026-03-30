@@ -179,7 +179,7 @@ class LandscapeBuilder:
             or any(p > s for p, s in zip(self._path.size, self._size))
         )
 
-        if needs_resize:    
+        if needs_resize:
             if not self._size:
                 logger.debug("Because no Landscape size was set, "
                              "it will now set to path dimensions.")
