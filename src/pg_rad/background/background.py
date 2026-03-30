@@ -11,7 +11,7 @@ def generate_background(
     cps_array: np.ndarray,
     detector: Detector,
     energy_keV: float,
-    
+
 ) -> np.ndarray:
     """
     Generate synthetic background cps for a given detector and energy.

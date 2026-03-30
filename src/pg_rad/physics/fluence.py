@@ -152,7 +152,7 @@ def calculate_counts_along_path(
         cps, detector, landscape.point_sources[0].isotope.E
     )
 
-    cps_with_bg = cps#  + bkg
+    cps_with_bg = cps + bkg
     # reshape so each segment is on a row
     cps_per_seg = cps_with_bg.reshape(num_segments, points_per_segment)
 
