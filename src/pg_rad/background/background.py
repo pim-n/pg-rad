@@ -9,11 +9,18 @@ from pg_rad.detector.detector import Detector
 
 def generate_background(
     cps_array: np.ndarray,
+    detector: Detector,
+    energy_keV: float,
+    
 ) -> np.ndarray:
     """
     Generate synthetic background cps for a given detector and energy.
     """
-    pass
+    ROI_lo, ROI_hi = get_roi_from_fwhm(detector, energy_keV)
+    lam = get_cps_from_roi(detector, ROI_lo, ROI_hi)
+
+    rng = np.random.default_rng()
+    return rng.poisson(lam=lam, size=cps_array.shape)
 
 
 def fwhm(A: float, B: float, C: float, E: float) -> float:
@@ -39,8 +46,13 @@ def get_cps_from_roi(
     roi_hi: float
 ) -> float:
 
-    csv = files('pg_rad.data.backgrounds').joinpath(detector.name+'.csv')
-    data = read_csv(csv)
+    try:
+        csv = files('pg_rad.data.backgrounds').joinpath(detector.name+'.csv')
+        data = read_csv(csv)
+    except FileNotFoundError:
+        raise NotImplementedError(
+            f"Detector {detector.name} does not have backgrounds implemented."
+        )
 
     # get indices of nearest bins
     idx_min = (data["Energy"] - roi_lo).abs().idxmin()

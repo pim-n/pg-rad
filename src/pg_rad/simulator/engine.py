@@ -39,13 +39,21 @@ class SimulationEngine:
         )
 
     def _calculate_count_rate_along_path(self) -> CountRateOutput:
-        acq_points, sub_points, cps, int_counts = calculate_counts_along_path(
-            self.landscape,
-            self.detector,
-            velocity=self.runtime_spec.speed
+        acq_points, sub_points, cps, int_counts, mean_bkg_counts = (
+            calculate_counts_along_path(
+                self.landscape,
+                self.detector,
+                velocity=self.runtime_spec.speed
+            )
         )
 
-        return CountRateOutput(acq_points, sub_points, cps, int_counts)
+        return CountRateOutput(
+            acq_points,
+            sub_points,
+            cps,
+            int_counts,
+            mean_bkg_counts
+        )
 
     def _calculate_point_source_distance_to_path(self) -> List[SourceOutput]:
 

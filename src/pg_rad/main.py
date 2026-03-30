@@ -111,7 +111,8 @@ def main():
             OutOfBoundsError,
             DimensionError,
             InvalidIsotopeError,
-            InvalidConfigValueError
+            InvalidConfigValueError,
+            NotImplementedError
         ) as e:
             logger.critical(e)
             logger.critical(

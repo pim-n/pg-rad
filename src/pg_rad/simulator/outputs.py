@@ -9,6 +9,7 @@ class CountRateOutput:
     sub_points: List[float]
     cps: List[float]
     integrated_counts: List[float]
+    mean_bkg_cps: List[float]
 
 
 @dataclass
