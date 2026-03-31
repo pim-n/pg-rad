@@ -1,5 +1,4 @@
 from importlib.resources import files
-from typing import List
 
 import numpy as np
 import pandas as pd
