@@ -1,4 +1,5 @@
 from importlib.resources import files
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -23,6 +24,15 @@ class ResultPlotter:
 
         plt.show()
 
+    def save(self, path: str, landscape_z: float = 0) -> None:
+        fig_1 = self._plot_main(landscape_z)
+        fig_2 = self._plot_detector()
+        fig_3 = self._plot_metadata()
+
+        fig_1.savefig(path+"/main.jpg")
+        fig_2.savefig(path+"/detector.jpg")
+        fig_3.savefig(path+"/metadata.jpg")
+
     def _plot_main(self, landscape_z):
         fig = plt.figure(figsize=(12, 8))
         fig.suptitle(self.landscape.name)
@@ -41,6 +51,7 @@ class ResultPlotter:
 
         ax_landscape = fig.add_subplot(gs[1, :])
         self._plot_landscape(ax_landscape, landscape_z)
+        return fig
 
     def _plot_detector(self):
         det = self.landscape.detector
@@ -61,6 +72,7 @@ class ResultPlotter:
             ]
 
             self._draw_angular_efficiency_polar(ax_polar, det, energies[0])
+        return fig
 
     def _plot_metadata(self):
         fig, axs = plt.subplots(2, 1, figsize=(10, 6))
@@ -68,6 +80,7 @@ class ResultPlotter:
 
         self._draw_table(axs[0])
         self._draw_source_table(axs[1])
+        return fig
 
     def _plot_landscape(self, ax, z):
         lp = LandscapeSlicePlotter()
@@ -84,7 +97,7 @@ class ResultPlotter:
         ax.set_ylabel('CPS [s$^{-1}$]')
 
     def _draw_counts(self, ax):
-        x = self.count_rate_res.acquisition_points[1:]
+        x = self.count_rate_res.distance[1:]
         y = self.count_rate_res.integrated_counts[1:]
         ax.plot(
             x, y, color='r', linestyle='--',
