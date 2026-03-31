@@ -4,8 +4,6 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.patches import Circle
 
-from numpy import median
-
 from pg_rad.landscape.landscape import Landscape
 
 logger = logging.getLogger(__name__)
