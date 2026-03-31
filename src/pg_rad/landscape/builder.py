@@ -150,8 +150,8 @@ class LandscapeBuilder:
             # the path is centered in the y direction.
             print(pos)
             if not (
-                (0 < pos[0] < self._size[0]) and
-                (-0.5 * self._size[1] < pos[1] < 0.5 * self._size[1])
+                (0 <= pos[0] <= self._size[0]) and
+                (-0.5 * self._size[1] <= pos[1] <= 0.5 * self._size[1])
             ):
                 raise OutOfBoundsError(
                     "One or more sources attempted to "
