@@ -2,6 +2,8 @@ from typing import Tuple, TYPE_CHECKING
 
 import numpy as np
 
+from pg_rad.background.background import generate_background
+
 if TYPE_CHECKING:
     from pg_rad.landscape.landscape import Landscape
     from pg_rad.detector.detector import Detector
@@ -146,12 +148,17 @@ def calculate_counts_along_path(
         landscape, full_positions, detector
     )
 
+    bkg = generate_background(
+        cps, detector, landscape.point_sources[0].isotope.E
+    )
+
+    cps_with_bg = cps + bkg
     # reshape so each segment is on a row
-    cps_per_seg = cps.reshape(num_segments, points_per_segment)
+    cps_per_seg = cps_with_bg.reshape(num_segments, points_per_segment)
 
     du = s[1] - s[0]
     integrated_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
     int_counts_result = np.zeros(num_points)
     int_counts_result[1:] = integrated_counts
 
-    return original_distances, s, cps, int_counts_result
+    return original_distances, s, cps_with_bg, int_counts_result, np.mean(bkg)

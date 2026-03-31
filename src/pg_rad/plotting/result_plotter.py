@@ -23,6 +23,15 @@ class ResultPlotter:
 
         plt.show()
 
+    def save(self, path: str, landscape_z: float = 0) -> None:
+        fig_1 = self._plot_main(landscape_z)
+        fig_2 = self._plot_detector()
+        fig_3 = self._plot_metadata()
+
+        fig_1.savefig(path+"/main.jpg")
+        fig_2.savefig(path+"/detector.jpg")
+        fig_3.savefig(path+"/metadata.jpg")
+
     def _plot_main(self, landscape_z):
         fig = plt.figure(figsize=(12, 8))
         fig.suptitle(self.landscape.name)
@@ -37,10 +46,11 @@ class ResultPlotter:
         self._draw_cps(ax_cps)
 
         ax_counts = fig.add_subplot(gs[0, 1])
-        self._draw_count_rate(ax_counts)
+        self._draw_counts(ax_counts)
 
         ax_landscape = fig.add_subplot(gs[1, :])
         self._plot_landscape(ax_landscape, landscape_z)
+        return fig
 
     def _plot_detector(self):
         det = self.landscape.detector
@@ -61,6 +71,7 @@ class ResultPlotter:
             ]
 
             self._draw_angular_efficiency_polar(ax_polar, det, energies[0])
+        return fig
 
     def _plot_metadata(self):
         fig, axs = plt.subplots(2, 1, figsize=(10, 6))
@@ -68,6 +79,7 @@ class ResultPlotter:
 
         self._draw_table(axs[0])
         self._draw_source_table(axs[1])
+        return fig
 
     def _plot_landscape(self, ax, z):
         lp = LandscapeSlicePlotter()
@@ -77,15 +89,20 @@ class ResultPlotter:
     def _draw_cps(self, ax):
         x = self.count_rate_res.sub_points
         y = self.count_rate_res.cps
-        ax.plot(x, y, color='b')
+        ax.plot(x, y, color='b', label=f'max(CPS) = {y.max():.2f}')
+        ax.legend(handlelength=0, handletextpad=0, fancybox=True)
         ax.set_title('Counts per second (CPS)')
         ax.set_xlabel('Arc length s [m]')
         ax.set_ylabel('CPS [s$^{-1}$]')
 
-    def _draw_count_rate(self, ax):
-        x = self.count_rate_res.acquisition_points
-        y = self.count_rate_res.integrated_counts
-        ax.plot(x, y, color='r', linestyle='--', alpha=0.2)
+    def _draw_counts(self, ax):
+        x = self.count_rate_res.distance[1:]
+        y = self.count_rate_res.integrated_counts[1:]
+        ax.plot(
+            x, y, color='r', linestyle='--',
+            alpha=0.2, label=f'max(counts) = {y.max():.2f}'
+        )
+        ax.legend(handlelength=0, handletextpad=0, fancybox=True)
         ax.scatter(x, y, color='r', marker='x')
         ax.set_title('Integrated counts')
         ax.set_xlabel('Arc length s [m]')
@@ -99,6 +116,7 @@ class ResultPlotter:
             ["Air density (kg/m^3)", round(self.landscape.air_density, 3)],
             ["Total path length (m)", round(self.landscape.path.length, 3)],
             ["Readout points", len(self.count_rate_res.integrated_counts)],
+            ["Mean background cps", round(self.count_rate_res.mean_bkg_cps, 3)]
         ]
 
         ax.table(
@@ -124,7 +142,7 @@ class ResultPlotter:
         # list field efficiencies for each primary gamma in the landscape
         effs = {e: det.get_efficiency(e) for e in source_energies}
         formatted_effs = ", ".join(
-            f"{value:.3f} @ {key:.1f} keV"
+            f"{value:.5f} @ {key:.1f} keV"
             for key, value in effs.items()
         )
         ax.set_axis_off()
@@ -201,6 +219,5 @@ class ResultPlotter:
 
         theta_rad = np.radians(theta_deg)
 
-        print(theta_rad)
         ax.plot(theta_rad, eff)
         ax.set_title(f"Rel. angular efficiency @ {energy_keV:.1f} keV")

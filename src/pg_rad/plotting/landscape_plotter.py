@@ -4,8 +4,6 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.patches import Circle
 
-from numpy import median
-
 from pg_rad.landscape.landscape import Landscape
 
 logger = logging.getLogger(__name__)
@@ -58,12 +56,7 @@ class LandscapeSlicePlotter:
         ax.set_xlim(right=max(width, .5*height))
 
         # if the road is very flat, we center it vertically (looks better)
-        if median(landscape.path.y_list) == 0:
-            h = max(height, .5*width)
-            ax.set_ylim(bottom=-h//2,
-                        top=h//2)
-        else:
-            ax.set_ylim(top=max(height, .5*width))
+        ax.set_ylim(bottom=-.5*width, top=.5*width)
 
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
