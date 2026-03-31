@@ -48,6 +48,8 @@ class SimulationEngine:
         )
 
         return CountRateOutput(
+            self.landscape.path.x_list,
+            self.landscape.path.y_list,
             acq_points,
             sub_points,
             cps,

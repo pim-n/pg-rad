@@ -5,7 +5,9 @@ from dataclasses import dataclass
 
 @dataclass
 class CountRateOutput:
-    acquisition_points: List[float]
+    x: List[float]
+    y: List[float]
+    distance: List[float]
     sub_points: List[float]
     cps: List[float]
     integrated_counts: List[float]
