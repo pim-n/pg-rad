@@ -2,10 +2,7 @@
     To get started quickly, you may copy and modify one of the example configs found [here](quickstart.md#example-configs).
 
 
-The config file must be a [YAML](https://yaml.org/) file. YAML is a serialization language that works with key-value pairs, but in a syntax more readable than some other alternatives. In YAML, the indentation matters. I
-
-
-The remainder of this chapter will explain the different required and optionals keys, what they represent, and allowed values. 
+The config file must be a [YAML](https://yaml.org/) file. YAML is a serialization language that works with key-value pairs, but in a syntax more readable than some other alternatives. The remainder of this chapter will explain the different required and optionals keys, what they represent, and allowed values.
 
 ## Required keys
 
@@ -124,11 +121,11 @@ Like with the lengths, if a turn segment has no angle specified, a random one (w
     Letting PG-RAD randomly assign lengths and angles can cause (expected) issues. That is because of physics restrictions. If the combination of length, angle (radius) and velocity of the vehicle is such that the centrifugal force makes it impossible to take this turn, PG-RAD will raise an error. To fix it, you can 1) reduce the speed; 2) define a smaller angle for the turn; or 3) assign more length to the turn segment.
 
 !!! info
-    For more information about how procedural roads are generated, including the random sampling of lengths and angles, see X
+    For more information about how procedural roads are generated, including the random sampling of lengths and angles, see [this](explainers/prefab_roads.ipynb) explainer.
 
 ### Sources
 
-Currently, the only type of source supported is a point source. Point sources can be added under the `sources` key, where the **subkey is the name** of the source:
+Currently, the only type of source supported is an isotropic point source. However, an arbitrary number of point sources can be added to the landscape. Point sources can be added under the `sources` key, where the **subkey is the name** of the source:
 
 ```yaml
 sources:
@@ -190,21 +187,10 @@ Note that side is relative to the direction of travel. The path will by default 
 
 ### Detector
 
-The final required key is the `detector`. Currently, only isotropic detectors are supported. Nonetheless, you must specify it with `name`, `is_isotropic` and `efficiency`:
+The final required key is the `detector`. Currently, custom detectors are not yet supported and you must choose from a list of existing detectors:
 
 ```yaml
-detector:
-  name: test
-  is_isotropic: True
-  efficiency: 0.02
-```
-
-Note there are some existing detectors available, where efficiency is not required and will be looked up by PG-RAD itself:
-
-```yaml
-detector:
-  name: NaIR
-  is_isotropic: True
+detector: LU_HPGe_90
 ```
 
 ## Optional keys

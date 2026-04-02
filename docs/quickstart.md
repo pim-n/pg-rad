@@ -22,13 +22,18 @@ Primary Gamma RADiation landscape tool
 
 If you get something like `pgrad: command not found`, please consult the [installation guide](installation.md).
 
-You can run a quick test scenario as follows:
+You can run a quick test by running the example landscape as follows:
 
 ```
-pgrad --test
+pgrad --example
 ```
 
-This should produce a plot of a scenario containing a single point source and a path.
+This should produce an output like
+
+```
+INFO: Landscape built successfully: Example landscape
+WARNING: No output produced. Use --save flag to save outputs and/or --showplots to display interactive plots.
+```
 
 ## Running PG-RAD
 
@@ -38,11 +43,11 @@ In order to use the CLI for your own simulations, you need to provide a *config 
 pgrad --config path/to/my_config.yml
 ```
 
-where `path/to/my_config.yml` points to your config file.
+where `path/to/my_config.yml` points to your config file. To check the results live, add the `--showplots` flag. If you want to save the results directly, then add the `--save` flag (you can use them at the same time as well).
 
 ## Example configs
 
-The easiest way is to take one of these example configs, and adjust them as needed. Alternatively, there is a detailed guide on how to write your own config file [here](config-spec.md).
+The easiest way to get started is to take one of these example configs, and adjust them as needed. Alternatively, there is a detailed guide on how to write your own config file [here](config-spec.md).
 
 === "Example 1"
 
@@ -61,15 +66,14 @@ The easiest way is to take one of these example configs, and adjust them as need
     sources:
       source1:
       activity_MBq: 1000
-      isotope: CS137
+      isotope: Cs137
+      gamma_energy_keV: 662
       position:
         along_path: 100
         dist_from_path: 50
         side: left
     
-    detector:
-      name: dummy
-      is_isotropic: True
+    detector: dummy
     ```
 
 === "Example 2"
@@ -89,21 +93,21 @@ The easiest way is to take one of these example configs, and adjust them as need
     sources:
       source1:
         activity_MBq: 1000
-        isotope: CS137
+        isotope: Cs137
+        gamma_energy_keV: 662
         position: [104.3, 32.5, 0]
       source2:
         activity_MBq: 100
-        isotope: CS137
+        isotope: Cs137
+        gamma_energy_keV: 662
         position: [0, 0, 0]
         
-    detector:
-      name: dummy
-      is_isotropic: True
+    detector: dummy
     ```
 
 === "Example 3"
 
-    This is an example of a procedural path with random apportionment of total length and random angles being assigned to turns. The parameter `alpha` is optional, and is related to randomness. A higher value leads to more uniform apportionment of lengths and a lower value to more random apportionment. More information about `alpha` can be found [here](pg-rad-config-spec.md).
+    This is an example of a procedural path with random apportionment of total length and random angles being assigned to turns. The parameter `alpha` is optional, and is related to randomness. A higher value leads to more uniform apportionment of lengths and a lower value to more random apportionment. More information about `alpha` can be found [here](explainers/prefab_roads.ipynb).
 
     ``` yaml
     name: Example 3
@@ -121,12 +125,11 @@ The easiest way is to take one of these example configs, and adjust them as need
     sources:
       source1:
         activity_MBq: 1000
-        isotope: CS137
+        isotope: Cs137
+        gamma_energy_keV: 662
         position: [0, 0, 0]
-        
-    detector:
-      name: dummy
-      is_isotropic: True
+
+    detector: dummy
     ```
 
 === "Example 4"
@@ -148,12 +151,11 @@ The easiest way is to take one of these example configs, and adjust them as need
     sources:
       source1:
         activity_MBq: 1000
-        isotope: CS137
+        isotope: Cs137
+        gamma_energy_keV: 662
         position: [0, 0, 0]
         
-    detector:
-      name: dummy
-      is_isotropic: True
+    detector: dummy
     ```
 
 === "Example 5"
@@ -178,10 +180,9 @@ The easiest way is to take one of these example configs, and adjust them as need
     sources:
       source1:
         activity_MBq: 1000
-        isotope: CS137
+        isotope: Cs137
+        gamma_energy_keV: 662
         position: [0, 0, 0]
         
-    detector:
-      name: dummy
-      is_isotropic: True
+    detector: dummy
     ```
