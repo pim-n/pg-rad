@@ -98,6 +98,11 @@ def main():
         if args.showplots:
             plotter.plot()
 
+        if not (args.save and args.showplots):
+            logger.warning(
+                "No output produced. Use --save flag to save outputs and/or "
+                "--showplots to display interactive plots."
+            )
     except (
         MissingConfigKeyError,
         KeyError
