@@ -67,8 +67,7 @@ def generate_csv_name(sim: SimulationOutput) -> str:
         [
             str(round(s.activity))+"MBq",
             str(round(s.dist_from_path))+"m",
-            str(round(s.position[0])),
-            str(round(s.position[1])),
+            str(round(s.position[0]))+'_'+str(round(s.position[1]))
         ]
         for s in sim.sources
     ]
