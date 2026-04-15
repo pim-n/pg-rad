@@ -27,5 +27,6 @@ class SourceOutput:
 @dataclass
 class SimulationOutput:
     name: str
+    size: tuple
     count_rate: CountRateOutput
     sources: List[SourceOutput]
