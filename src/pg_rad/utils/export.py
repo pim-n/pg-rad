@@ -1,15 +1,24 @@
+from dataclasses import asdict
 from datetime import datetime as dt
+import json
 import os
 import logging
 import re
 
-from numpy import array, full_like
+from numpy import array, full_like, ndarray
 from pandas import DataFrame
 
 from pg_rad.simulator.outputs import SimulationOutput
 
 
 logger = logging.getLogger(__name__)
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 
 def generate_folder_name(sim: SimulationOutput) -> str:
@@ -35,7 +44,16 @@ def save_results(sim: SimulationOutput, folder_name: str) -> None:
     df = generate_df(sim)
     csv_name = generate_csv_name(sim)
     df.to_csv(f"{folder_name}/{csv_name}.csv", index=False)
+    with open(f"{folder_name}/parameters.json", 'w') as f:
+        json.dump(generate_sim_param_dict(sim), f, cls=NumpyEncoder)
     logger.info(f"Simulation output saved to {folder_name}!")
+
+
+def generate_sim_param_dict(sim: SimulationOutput) -> dict:
+    """Parse simulation parameters and hyperparameters to dictionary."""
+    d = asdict(sim)
+    d.pop('count_rate')
+    return d
 
 
 def generate_df(sim: SimulationOutput) -> DataFrame:
