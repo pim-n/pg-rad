@@ -34,6 +34,7 @@ class SimulationEngine:
 
         return SimulationOutput(
             name=self.landscape.name,
+            size=self.landscape.size,
             count_rate=count_rate_results,
             sources=source_results
         )
