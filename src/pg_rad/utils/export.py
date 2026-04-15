@@ -80,6 +80,7 @@ def generate_df(sim: SimulationOutput) -> DataFrame:
 def generate_csv_name(sim: SimulationOutput) -> str:
     """Generate CSV name according to Alex' specification"""
     num_src = len(sim.sources)
+    src_ids = [str(i+1) for i in range(num_src)]
     bkg_cps = round(sim.count_rate.mean_bkg_cps)
     source_param_strings = [
         [
@@ -99,5 +100,6 @@ def generate_csv_name(sim: SimulationOutput) -> str:
 
         src_str = "_".join(src_str_array.flat)
 
-    csv_name = f"{num_src}_src_{bkg_cps}_cps_bkg_{src_str}"
+    src_ids_str = "_".join(src_ids)
+    csv_name = f"{src_ids_str}_src_{bkg_cps}_cps_bkg_{src_str}"
     return csv_name
