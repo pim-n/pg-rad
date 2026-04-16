@@ -5,7 +5,7 @@ import os
 import logging
 import re
 
-from numpy import array, full_like, ndarray
+from numpy import array, full_like, ndarray, bool_
 from pandas import DataFrame
 
 from pg_rad.simulator.outputs import SimulationOutput
@@ -18,6 +18,8 @@ class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, ndarray):
             return obj.tolist()
+        elif isinstance(obj, bool_):
+            return bool(obj)
         return super().default(obj)
 
 
@@ -44,8 +46,10 @@ def save_results(sim: SimulationOutput, folder_name: str) -> None:
     df = generate_df(sim)
     csv_name = generate_csv_name(sim)
     df.to_csv(f"{folder_name}/{csv_name}.csv", index=False)
+    param_dict = generate_sim_param_dict(sim)
+    print(type(param_dict['detector']['is_isotropic']))
     with open(f"{folder_name}/parameters.json", 'w') as f:
-        json.dump(generate_sim_param_dict(sim), f, cls=NumpyEncoder)
+        json.dump(param_dict, f, cls=NumpyEncoder)
     logger.info(f"Simulation output saved to {folder_name}!")
 
 

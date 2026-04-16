@@ -25,8 +25,17 @@ class SourceOutput:
 
 
 @dataclass
+class DetectorOutput:
+    name: str
+    type: str
+    is_isotropic: bool
+    field_eff: float
+
+
+@dataclass
 class SimulationOutput:
     name: str
     size: tuple
+    detector: DetectorOutput
     count_rate: CountRateOutput
     sources: List[SourceOutput]

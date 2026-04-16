@@ -3,6 +3,7 @@ from typing import List
 from pg_rad.landscape.landscape import Landscape
 from pg_rad.simulator.outputs import (
     CountRateOutput,
+    DetectorOutput,
     SimulationOutput,
     SourceOutput
 )
@@ -31,11 +32,13 @@ class SimulationEngine:
 
         count_rate_results = self._calculate_count_rate_along_path()
         source_results = self._calculate_point_source_distance_to_path()
+        detector_results = self._generate_detector_output()
 
         return SimulationOutput(
             name=self.landscape.name,
             size=self.landscape.size,
             count_rate=count_rate_results,
+            detector=detector_results,
             sources=source_results
         )
 
@@ -80,3 +83,13 @@ class SimulationEngine:
             )
 
         return source_output
+
+    def _generate_detector_output(self) -> DetectorOutput:
+        return DetectorOutput(
+            name=self.detector.name,
+            type=self.detector.type,
+            is_isotropic=self.detector.is_isotropic,
+            field_eff=self.detector.get_efficiency(
+                self.landscape.point_sources[0].isotope.E
+            )
+        )
