@@ -70,8 +70,8 @@ def generate_df(sim: SimulationOutput) -> DataFrame:
 
     result_df = DataFrame(
         {
-            "East": sim.count_rate.x,
-            "North": sim.count_rate.y,
+            "East": sim.count_rate.x[1:],
+            "North": sim.count_rate.y[1:],
             "ROI_P": sim.count_rate.integrated_counts,
             "ROI_BR": br_array,
             "Dist": sim.count_rate.distance
