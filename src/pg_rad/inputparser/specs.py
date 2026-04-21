@@ -18,6 +18,7 @@ class RuntimeSpec:
 class SimulationOptionsSpec:
     air_density: float
     seed: int | None = None
+    bkg_cps: int | None = None
 
 
 @dataclass

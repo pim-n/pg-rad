@@ -104,7 +104,7 @@ class ConfigParser:
     def _parse_options(self) -> SimulationOptionsSpec:
         options = self.config.get("options", {})
 
-        allowed = {"air_density_kg_per_m3", "seed"}
+        allowed = {"air_density_kg_per_m3", "seed", "bkg_cps"}
         self._warn_unknown_keys(
             section="options",
             provided=set(options.keys()),
@@ -116,12 +116,14 @@ class ConfigParser:
             defaults.DEFAULT_AIR_DENSITY
         )
         seed = options.get("seed")
+        bkg_cps = options.get("bkg_cps")
 
         if not isinstance(air_density, float) or air_density <= 0:
             raise InvalidConfigValueError(
                 "options.air_density_kg_per_m3 must be a positive float "
                 "in kg/m^3."
             )
+
         if (
             seed is not None or
             (isinstance(seed, int) and seed <= 0)
@@ -130,9 +132,17 @@ class ConfigParser:
                 "Seed must be a positive integer value."
             )
 
+        if bkg_cps is not None and (
+            not isinstance(bkg_cps, int) or bkg_cps < 0
+        ):
+            raise InvalidConfigValueError(
+                "Background CPS must be an integer >= 0."
+            )
+
         return SimulationOptionsSpec(
             air_density=air_density,
             seed=seed,
+            bkg_cps=bkg_cps
         )
 
     def _parse_path(self) -> PathSpec:

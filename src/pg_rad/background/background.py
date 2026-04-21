@@ -11,13 +11,17 @@ def generate_background(
     cps_array: np.ndarray,
     detector: Detector,
     energy_keV: float,
+    lam_inp: int | None = None
 
 ) -> np.ndarray:
     """
     Generate synthetic background cps for a given detector and energy.
     """
-    ROI_lo, ROI_hi = get_roi_from_fwhm(detector, energy_keV)
-    lam = get_cps_from_roi(detector, ROI_lo, ROI_hi)
+    if not lam_inp:
+        ROI_lo, ROI_hi = get_roi_from_fwhm(detector, energy_keV)
+        lam = get_cps_from_roi(detector, ROI_lo, ROI_hi)
+    else:
+        lam = lam_inp
 
     rng = np.random.default_rng()
     return rng.poisson(lam=lam, size=cps_array.shape)

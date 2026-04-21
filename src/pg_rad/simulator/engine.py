@@ -47,7 +47,8 @@ class SimulationEngine:
             calculate_counts_along_path(
                 self.landscape,
                 self.detector,
-                velocity=self.runtime_spec.speed
+                velocity=self.runtime_spec.speed,
+                bkg_cps_input=self.sim_spec.bkg_cps
             )
         )
 
