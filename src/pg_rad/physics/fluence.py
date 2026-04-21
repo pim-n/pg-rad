@@ -167,8 +167,6 @@ def calculate_counts_along_path(
     cps_per_seg = cps_with_bg.reshape(num_segments, points_per_segment)
 
     du = s[1] - s[0]
-    integrated_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
-    int_counts_result = np.zeros(num_points)
-    int_counts_result[1:] = integrated_counts
+    int_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
 
-    return original_distances, s, cps_with_bg, int_counts_result, np.mean(bkg)
+    return original_distances[1:], s, cps_with_bg, int_counts, np.mean(bkg)
