@@ -109,6 +109,7 @@ def calculate_counts_along_path(
     detector: "Detector",
     velocity: float,
     points_per_segment: int = 10,
+    bkg_cps_input: int | None = None
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the counts recorded in each acquisition period in the landscape.
 
@@ -116,6 +117,7 @@ def calculate_counts_along_path(
         landscape (Landscape): _description_
         detector (Detector): _description_
         points_per_segment (int, optional): _description_. Defaults to 100.
+        bkg_cps_input (int | None, optional): Optional background CPS.
 
     Returns:
         Tuple[np.ndarray, np.ndarray]: Array of acquisition points and
@@ -148,17 +150,23 @@ def calculate_counts_along_path(
         landscape, full_positions, detector
     )
 
-    bkg = generate_background(
-        cps, detector, landscape.point_sources[0].isotope.E
-    )
+    if bkg_cps_input is None:
+        bkg = generate_background(
+            cps, detector, landscape.point_sources[0].isotope.E
+        )
+    elif bkg_cps_input == 0:
+        bkg = bkg_cps_input
+    else:
+        bkg = generate_background(
+            cps, detector, landscape.point_sources[0].isotope.E,
+            lam_inp=bkg_cps_input
+        )
 
     cps_with_bg = cps + bkg
     # reshape so each segment is on a row
     cps_per_seg = cps_with_bg.reshape(num_segments, points_per_segment)
 
     du = s[1] - s[0]
-    integrated_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
-    int_counts_result = np.zeros(num_points)
-    int_counts_result[1:] = integrated_counts
+    int_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
 
-    return original_distances, s, cps_with_bg, int_counts_result, np.mean(bkg)
+    return original_distances[1:], s, cps_with_bg, int_counts, np.mean(bkg)
