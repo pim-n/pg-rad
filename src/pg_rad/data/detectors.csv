@@ -2,3 +2,4 @@ name,type,is_isotropic
 dummy,NaI,true
 LU_NaI_3inch,NaI,true
 LU_HPGe_90,HPGe,false
+LU_NaIR,NaI,true
