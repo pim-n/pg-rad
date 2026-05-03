@@ -109,7 +109,8 @@ def calculate_counts_along_path(
     detector: "Detector",
     velocity: float,
     points_per_segment: int = 10,
-    bkg_cps_input: int | None = None
+    bkg_cps_input: int | None = None,
+    seed: int | None = None
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the counts recorded in each acquisition period in the landscape.
 
@@ -152,14 +153,16 @@ def calculate_counts_along_path(
 
     if bkg_cps_input is None:
         bkg = generate_background(
-            cps, detector, landscape.point_sources[0].isotope.E
+            cps, detector, landscape.point_sources[0].isotope.E,
+            seed=seed
         )
     elif bkg_cps_input == 0:
         bkg = bkg_cps_input
     else:
         bkg = generate_background(
             cps, detector, landscape.point_sources[0].isotope.E,
-            lam_inp=bkg_cps_input
+            lam_inp=bkg_cps_input,
+            seed=seed
         )
 
     cps_with_bg = cps + bkg

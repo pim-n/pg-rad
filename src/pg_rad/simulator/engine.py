@@ -48,7 +48,8 @@ class SimulationEngine:
                 self.landscape,
                 self.detector,
                 velocity=self.runtime_spec.speed,
-                bkg_cps_input=self.sim_spec.bkg_cps
+                bkg_cps_input=self.sim_spec.bkg_cps,
+                seed=self.sim_spec.seed
             )
         )
 
@@ -59,7 +60,8 @@ class SimulationEngine:
             sub_points,
             cps,
             int_counts,
-            mean_bkg_counts
+            mean_bkg_counts,
+            self.sim_spec.seed
         )
 
     def _calculate_point_source_distance_to_path(self) -> List[SourceOutput]:

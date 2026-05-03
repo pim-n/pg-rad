@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 
+from numpy.random import SeedSequence
 from pandas.errors import ParserError
 
 from pg_rad.exceptions.exceptions import (
@@ -77,12 +78,18 @@ def main():
                 gamma_energy_keV: 661
 
         detector: LU_NaI_3inch
+
+        options:
+          seed: 1234
         """
     elif args.config:
         input_config = args.config
 
     try:
         cp = ConfigParser(input_config).parse()
+        if cp.options.seed is None:
+            entr = SeedSequence().entropy
+            cp.options.seed = int(str(entr)[:6])
         landscape = LandscapeDirector.build_from_config(cp)
         output = SimulationEngine(
             landscape=landscape,
