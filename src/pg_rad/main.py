@@ -84,7 +84,11 @@ def main():
         """
     elif args.config:
         input_config = args.config
-
+    else:
+        logger.warning(
+            "No input provided. Try --example or --config path/to/config.yml. "
+        )
+        sys.exit(1)
     try:
         cp = ConfigParser(input_config).parse()
         if cp.options.seed is None:
