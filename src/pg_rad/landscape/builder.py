@@ -107,7 +107,8 @@ class LandscapeBuilder:
 
     def set_point_sources(
         self,
-        *sources: AbsolutePointSourceSpec | RelativePointSourceSpec
+        *sources: AbsolutePointSourceSpec | RelativePointSourceSpec,
+        bounds_check: bool = False
     ):
         """Add one or more point sources to the world.
 
@@ -148,7 +149,7 @@ class LandscapeBuilder:
 
             # we dont support -x values, but negative y values are possible as
             # the path is centered in the y direction.
-            if not (
+            if bounds_check and not (
                 (0 <= pos[0] <= self._size[0]) and
                 (-0.5 * self._size[1] <= pos[1] <= 0.5 * self._size[1])
             ):

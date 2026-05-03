@@ -125,7 +125,7 @@ class ConfigParser:
             )
 
         if (
-            seed is not None or
+            seed is not None and
             (isinstance(seed, int) and seed <= 0)
         ):
             raise InvalidConfigValueError(
