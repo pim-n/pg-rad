@@ -116,6 +116,7 @@ class ResultPlotter:
             ["Air density (kg/m^3)", round(self.landscape.air_density, 3)],
             ["Total path length (m)", round(self.landscape.path.length, 3)],
             ["Readout points", len(self.count_rate_res.integrated_counts)],
+            ["Seed", self.count_rate_res.seed],
             ["Mean background cps", round(self.count_rate_res.mean_bkg_cps, 3)]
         ]
 

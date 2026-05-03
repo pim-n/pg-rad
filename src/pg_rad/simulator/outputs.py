@@ -12,6 +12,7 @@ class CountRateOutput:
     cps: List[float]
     integrated_counts: List[float]
     mean_bkg_cps: List[float]
+    seed: int
 
 
 @dataclass

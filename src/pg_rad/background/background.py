@@ -11,7 +11,8 @@ def generate_background(
     cps_array: np.ndarray,
     detector: Detector,
     energy_keV: float,
-    lam_inp: int | None = None
+    lam_inp: int | None = None,
+    seed: int | None = None
 
 ) -> np.ndarray:
     """
@@ -23,7 +24,7 @@ def generate_background(
     else:
         lam = lam_inp
 
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed=seed)
     return rng.poisson(lam=lam, size=cps_array.shape)
 
 
