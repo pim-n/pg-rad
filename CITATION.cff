@@ -1,0 +1,26 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: PG-RAD - Primary Gamma RADiation Simulator
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Pim
+    family-names: Nelissen
+    email: pi0274ne-s@student.lu.se
+    affiliation: Lund University
+repository-code: 'https://github.com/pim-n/pg-rad'
+abstract: >-
+  Primary Gamma RADiation (PG-RAD) is a deterministic
+  landscape simulator to simulate vehicle-based gamma source
+  localization scenarios.
+keywords:
+  - gamma spectrometry
+  - mobile gamma spectrometry
+  - emergency preparedness
+  - environmental radiation
+license: MIT
+
