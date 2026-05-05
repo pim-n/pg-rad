@@ -49,6 +49,7 @@ class SimulationEngine:
                 self.detector,
                 velocity=self.runtime_spec.speed,
                 bkg_cps_input=self.sim_spec.bkg_cps,
+                t_acq=self.runtime_spec.acquisition_time,
                 seed=self.sim_spec.seed
             )
         )

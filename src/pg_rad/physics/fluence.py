@@ -108,6 +108,7 @@ def calculate_counts_along_path(
     landscape: "Landscape",
     detector: "Detector",
     velocity: float,
+    t_acq: float,
     points_per_segment: int = 10,
     bkg_cps_input: int | None = None,
     seed: int | None = None
@@ -166,10 +167,26 @@ def calculate_counts_along_path(
         )
 
     cps_with_bg = cps + bkg
-    # reshape so each segment is on a row
-    cps_per_seg = cps_with_bg.reshape(num_segments, points_per_segment)
 
-    du = s[1] - s[0]
-    int_counts = np.trapezoid(cps_per_seg, dx=du, axis=1) / velocity
+    # Integrate along time dimension. see e.g. Bukartas (2021 doccomp.)
+    t = s / abs(velocity)
 
-    return original_distances[1:], s, cps_with_bg, int_counts, np.mean(bkg)
+    # acquisition bins
+    t_bins = np.arange(0, t[-1] + t_acq, t_acq)
+
+    int_counts = np.zeros(len(t_bins) - 1)
+    acq_points = np.zeros(len(t_bins) - 1)
+
+    for i in range(len(t_bins) - 1):
+        mask = (t >= t_bins[i]) & (t < t_bins[i + 1])
+
+        int_counts[i] = np.trapezoid(cps_with_bg[mask], t[mask])
+        acq_points[i] = np.mean(s[mask])
+
+    return (
+        acq_points[:-1],
+        s[:-1],
+        cps_with_bg[:-1],
+        int_counts[:-1],
+        np.mean(bkg)
+        )
