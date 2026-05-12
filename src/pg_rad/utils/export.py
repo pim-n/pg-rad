@@ -47,7 +47,6 @@ def save_results(sim: SimulationOutput, folder_name: str) -> None:
     csv_name = generate_csv_name(sim)
     df.to_csv(f"{folder_name}/{csv_name}.csv", index=False)
     param_dict = generate_sim_param_dict(sim)
-    print(type(param_dict['detector']['is_isotropic']))
     with open(f"{folder_name}/parameters.json", 'w') as f:
         json.dump(param_dict, f, cls=NumpyEncoder)
     logger.info(f"Simulation output saved to {folder_name}!")
