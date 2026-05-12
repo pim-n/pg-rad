@@ -98,13 +98,26 @@ class ResultPlotter:
     def _draw_counts(self, ax):
         x = self.count_rate_res.distance[1:]
         y = self.count_rate_res.integrated_counts[1:]
+
+        yerr = np.sqrt(y)
+        peak_idx = y.argmax()
+
+        ax.fill_between(
+            x,
+            y - yerr,
+            y + yerr,
+            color='red',
+            alpha=0.15,
+        )
+
         ax.plot(
-            x, y, color='r', linestyle='--',
-            alpha=0.2, label=f'max(counts) = {y.max():.2f}'
+            x, y,
+            color='r', linestyle='--', alpha=0.2,
+            label=rf'max(counts)={y[peak_idx]:.2f} $\pm$ {yerr[peak_idx]:.2f}'
         )
         ax.legend(handlelength=0, handletextpad=0, fancybox=True)
         ax.scatter(x, y, color='r', marker='x')
-        ax.set_title('Integrated counts')
+        ax.set_title('Counts')
         ax.set_xlabel('Arc length s [m]')
         ax.set_ylabel('N')
 
