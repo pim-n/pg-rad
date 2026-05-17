@@ -21,7 +21,7 @@ channels:
 dependencies:
   - python=3.12
   - pip:
-    - git+ssh://git@github.com/pim-n/pg-rad.git@main
+    - git+ssh://git@github.com/pim-n/pg-rad.git@v0.1.0
 ```
 4. Run `conda env create -f environment.yml` to create the environment
 5. Run `conda activate pg-rad-analysis`. You should now be in the conda environment `my-pgrad-env`.
