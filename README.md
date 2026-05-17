@@ -20,7 +20,6 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - pip
   - pip:
     - git+ssh://git@github.com/pim-n/pg-rad.git@main
 ```
