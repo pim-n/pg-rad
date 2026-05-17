@@ -10,12 +10,12 @@ where = ["src"]
 "pg_rad.configs" = ["*.yml"]
 
 [project]
-name = "pg-rad"
+name = "pgrad"
 version = "0.1.0"
 authors = [
   { name="Pim Nelissen", email="pi0274ne-s@student.lu.se" },
 ]
-description = "Primary Gamma RADiation Simulator"
+description = "PG-RAD - Primary Gamma RADiation Simulator"
 readme = "README.md"
 requires-python = ">=3.12.4,<3.13"
 dependencies = [
@@ -37,4 +37,4 @@ Issues = "https://github.com/pim-n/pg-rad/issues"
 
 [project.optional-dependencies]
 
-dev = ["pytest", "mkinit", "notebook", "mkdocs-material", "mkdocstrings-python", "mkdocs-jupyter", "flake8"]
+dev = ["pytest", "notebook", "mkdocs-material", "mkdocstrings-python", "mkdocs-jupyter", "flake8"]
