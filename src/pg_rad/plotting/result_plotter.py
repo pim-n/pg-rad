@@ -10,6 +10,9 @@ from pg_rad.simulator.outputs import SimulationOutput
 from pg_rad.landscape.landscape import Landscape
 
 
+plt.set_loglevel(level='warning')
+
+
 class ResultPlotter:
     def __init__(self, landscape: Landscape, output: SimulationOutput):
         self.landscape = landscape

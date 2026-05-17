@@ -7,6 +7,7 @@ from matplotlib.patches import Circle
 from pg_rad.landscape.landscape import Landscape
 
 logger = logging.getLogger(__name__)
+plt.set_loglevel(level='warning')
 
 
 class LandscapeSlicePlotter:

@@ -12,6 +12,7 @@ from pg_rad.simulator.outputs import SimulationOutput
 
 
 logger = logging.getLogger(__name__)
+logging.getLogger("PIL").setLevel(logging.WARNING)
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -43,6 +44,13 @@ def save_results(sim: SimulationOutput, folder_name: str) -> None:
         if ans.lower() == 'n':
             return
 
+    logger.debug(
+        f"Integrated counts: {list(sim.count_rate.integrated_counts)}"
+    )
+    logger.debug(
+        f"Distances: {list(sim.count_rate.distance)}"
+    )
+
     df = generate_df(sim)
     csv_name = generate_csv_name(sim)
     df.to_csv(f"{folder_name}/{csv_name}.csv", index=False)
@@ -67,10 +75,22 @@ def generate_df(sim: SimulationOutput) -> DataFrame:
         sim.count_rate.mean_bkg_cps
     )
 
+    east_coords = sim.count_rate.x[1:]
+    north_coords = sim.count_rate.y[1:]
+
+    if len(east_coords) != sim.count_rate.integrated_counts.shape:
+        east_coords = None
+        north_coords = None
+        logger.warning(
+            "PG-RAD currently does not support interpolation"
+            " of experimental paths for export. Only ROI_P, ROI_BR and Dist"
+            " will be saved."
+        )
+
     result_df = DataFrame(
         {
-            "East": sim.count_rate.x[1:],
-            "North": sim.count_rate.y[1:],
+            "East": east_coords,
+            "North": north_coords,
             "ROI_P": sim.count_rate.integrated_counts,
             "ROI_BR": br_array,
             "Dist": sim.count_rate.distance
