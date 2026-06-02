@@ -78,13 +78,12 @@ def generate_df(sim: SimulationOutput) -> DataFrame:
     east_coords = sim.count_rate.x[1:]
     north_coords = sim.count_rate.y[1:]
 
-    if len(east_coords) != sim.count_rate.integrated_counts.shape:
+    if len(east_coords) != sim.count_rate.integrated_counts.shape[0]:
         east_coords = None
         north_coords = None
         logger.warning(
-            "PG-RAD currently does not support interpolation"
-            " of experimental paths for export. Only ROI_P, ROI_BR and Dist"
-            " will be saved."
+            "PG-RAD currently does not support this experimental path."
+            " Only ROI_P, ROI_BR and Dist will be saved."
         )
 
     result_df = DataFrame(
