@@ -1,6 +1,6 @@
 ## Installation
 
-See the [installation guide](installation.md).
+See the [Installation Guide](installation.md).
 
 ## Test your installation
 
@@ -34,6 +34,20 @@ This should produce an output like
 INFO: Landscape built successfully: Example landscape
 WARNING: No output produced. Use --save flag to save outputs and/or --showplots to display interactive plots.
 ```
+
+Running
+
+```
+pgrad --example --show
+```
+
+should produce visual output. Running 
+
+```
+pgrad --example --save
+```
+
+should create a new directory in whatever directory you ran `pgrad`, which contains the saved outputs.
 
 ## Running PG-RAD
 

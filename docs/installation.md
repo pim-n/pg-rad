@@ -1,47 +1,33 @@
-## Requirements
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-312/)
+[![Tests](https://github.com/pim-n/pg-rad/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/pim-n/pg-rad/actions/workflows/ci-tests.yml)
 
-PG-RAD requires Python `>=3.12.4` and `<3.13`. It has been tested on `3.12.9`. The guides below assume a unix-like system. You can check the Python version you have installed as follows:
+PG-RAD is a Python 3.12 package and is only tested on x86_64 Linux systems. The following installation instructions were testing for a fresh virtual machine running Ubuntu 26.04 LTS.
 
-```
-python --version
-```
+### Conda installation (Tested and recommended)
 
-If you don't have the right version installed there are various ways to get a compatible version, such as [pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation).
+1. Install git by `sudo apt update && sudo apt install git`
+2. Install miniforge by following [these](https://conda-forge.org/download/) instructions.
+3. Create a file called `environment.yml`, and paste the following in there:
 
-## Installation (CLI)
+    ```yaml
+    name: my-pgrad-env
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.12
+      - pip:
+        - git+ssh://git@github.com/pim-n/pg-rad.git@v0.1.1
+    ```
+    You can replace the name of the environment if desired.
 
-<!--pipx seems like a possible option to install python package in a contained environment on unix-->
+4. Run `conda env create -f environment.yml` to create the environment
+5. Run `conda activate my-pgrad-env`. You should now be in the conda environment `my-pgrad-env`.
+6. To test if installation was succesful, run `pgrad --example --show`. If this runs without errors and produces visual output, PG-RAD is correctly installed.
 
-Lorem ipsum
+### Manual installation
 
-## Installation (Python module)
+If you prefer another virtual environment, you still need git installed. Ensure the Python version of the environment is `>3.12.4` and `<3.13`. Then, with your virtual environment activated, run `pip install git+ssh://git@github.com/pim-n/pg-rad.git@main`. Run `pgrad --example --show` to check if the installation was successful.
 
-If you are interested in using PG-RAD in another Python project, create a virtual environment first:
+### Usage
 
-```
-python -m venv .venv
-```
-
-Then install PG-RAD in it:
-
-```
-source .venv/bin/activate
-(.venv) pip install git+https://github.com/pim-n/pg-rad
-```
-
-See how to get started with PG-RAD with your own Python code [here](pg-rad-in-python).
-
-## For developers
-```
-git clone https://github.com/pim-n/pg-rad
-cd pg-rad
-git checkout dev
-```
-
-or
-
-```
-git@github.com:pim-n/pg-rad.git
-cd pg-rad
-git checkout dev
-```
+For usage, see the [Quickstart Guide](quickstart.md).

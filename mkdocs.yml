@@ -61,3 +61,5 @@ nav:
   - Explainers:
     - explainers/planar_curve.ipynb
     - explainers/prefab_roads.ipynb
+    - explainers/count_rate_along_path.ipynb
+  - Thesis: explainers/Nelissen_Pim_Thesis_MORC_PGRAD.pdf
